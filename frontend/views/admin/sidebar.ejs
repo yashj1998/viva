@@ -1,0 +1,241 @@
+<!-- Admin Sidebar Navigation -->
+<aside class="w-64 bg-[#123524] text-white flex flex-col justify-between shrink-0 min-h-screen select-none">
+  <div class="flex flex-col h-full">
+    <!-- Brand Header -->
+    <div class="p-5 border-b border-white/10 flex items-center justify-between">
+      <a href="/admin" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-950/40">
+          <i class="fa-solid fa-shield-halved text-base"></i>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-heading font-bold text-lg tracking-tight leading-none text-white">
+            Vi<span class="text-emerald-400">V</span>A
+          </span>
+          <span class="text-[9px] font-semibold tracking-[0.2em] text-emerald-400 uppercase leading-none mt-1">
+            Admin Console
+          </span>
+        </div>
+      </a>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-emerald-300 font-semibold uppercase">
+        <%= (typeof currentUser !== 'undefined' && currentUser.role) ? currentUser.role : 'Admin' %>
+      </span>
+    </div>
+
+    <!-- Navigation Groups -->
+    <nav class="p-3 space-y-4 text-xs font-medium overflow-y-auto flex-1 custom-scrollbar">
+      
+      <!-- Section: Overview -->
+      <div>
+        <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400/70 mb-1.5">Overview</p>
+        <div class="space-y-1">
+          <a 
+            href="/admin" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'dashboard' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-chart-pie w-4 text-center text-emerald-400"></i>
+              <span>Dashboard &amp; Analytics</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Section: Commerce -->
+      <div>
+        <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400/70 mb-1.5">Commerce</p>
+        <div class="space-y-1">
+          <a 
+            href="/admin/products" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'products' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-boxes-stacked w-4 text-center text-emerald-300"></i>
+              <span>Products Catalog</span>
+            </div>
+          </a>
+
+          <a 
+            href="/admin/inventory" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'inventory' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-warehouse w-4 text-center text-emerald-300"></i>
+              <span>Inventory &amp; Stock</span>
+            </div>
+          </a>
+
+          <a 
+            href="/admin/top-picks" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'top-picks' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-wand-magic-sparkles w-4 text-center text-amber-300"></i>
+              <span>Top Picks Deals</span>
+            </div>
+            <span class="text-[9px] bg-amber-400/25 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase">Deals</span>
+          </a>
+
+          <a 
+            href="/admin/categories" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'categories' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-layer-group w-4 text-center text-emerald-300"></i>
+              <span>Categories</span>
+            </div>
+          </a>
+
+          <a 
+            href="/admin/orders" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'orders' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-receipt w-4 text-center text-emerald-300"></i>
+              <span>Orders &amp; Shipping</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Section: Content & Media -->
+      <div>
+        <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400/70 mb-1.5">Content &amp; Assets</p>
+        <div class="space-y-1">
+          <a 
+            href="/admin/banners" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'banners' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-panorama w-4 text-center text-emerald-300"></i>
+              <span>Hero &amp; Promo Banners</span>
+            </div>
+          </a>
+
+          <a 
+            href="/admin/media" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'media' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-regular fa-images w-4 text-center text-emerald-300"></i>
+              <span>Media Library</span>
+            </div>
+          </a>
+
+          <a 
+            href="/admin/reviews" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'reviews' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-regular fa-star w-4 text-center text-amber-300"></i>
+              <span>Customer Reviews</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Section: Support & CRM -->
+      <div>
+        <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400/70 mb-1.5">Support &amp; Leads</p>
+        <div class="space-y-1">
+          <a 
+            href="/admin/inquiries" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'inquiries' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-regular fa-comment-dots w-4 text-center text-emerald-300"></i>
+              <span>Customer Inquiries</span>
+            </div>
+          </a>
+
+          <a 
+            href="/admin/subscribers" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'subscribers' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-regular fa-envelope w-4 text-center text-emerald-300"></i>
+              <span>Newsletter Leads</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Section: Administration (RBAC) -->
+      <div>
+        <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-emerald-400/70 mb-1.5">Administration</p>
+        <div class="space-y-1">
+          <% if (typeof currentUser === 'undefined' || currentUser.role === 'admin') { %>
+            <a 
+              href="/admin/users?tab=sellers" 
+              class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= (activeTab === 'users' && typeof subTab !== 'undefined' && subTab === 'sellers') ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+            >
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-store w-4 text-center text-amber-300"></i>
+                <span>Sellers &amp; Merchants DB</span>
+              </div>
+              <span class="text-[9px] bg-amber-400/25 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase">DB</span>
+            </a>
+
+            <a 
+              href="/admin/users" 
+              class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= (activeTab === 'users' && (typeof subTab === 'undefined' || subTab !== 'sellers')) ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+            >
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-users-gear w-4 text-center text-emerald-300"></i>
+                <span>Users &amp; Customers</span>
+              </div>
+            </a>
+          <% } %>
+
+          <a 
+            href="/admin/profile" 
+            class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'profile' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+          >
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-id-card-clip w-4 text-center text-emerald-300"></i>
+              <span><%= (typeof currentUser !== 'undefined' && currentUser.role === 'seller') ? 'My Store Profile' : 'Store Profile' %></span>
+            </div>
+          </a>
+
+          <% if (typeof currentUser === 'undefined' || currentUser.role === 'admin') { %>
+            <a 
+              href="/admin/settings" 
+              class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'settings' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+            >
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-sliders w-4 text-center text-emerald-300"></i>
+                <span>Settings &amp; SEO</span>
+              </div>
+            </a>
+
+            <a 
+              href="/admin/audit-logs" 
+              class="flex items-center justify-between px-3 py-2 rounded-xl transition-colors <%= activeTab === 'audit-logs' ? 'bg-white/20 text-white font-semibold shadow-sm' : 'text-gray-300 hover:bg-white/10 hover:text-white' %>"
+            >
+              <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-clipboard-list w-4 text-center text-emerald-300"></i>
+                <span>Audit Trail Logs</span>
+              </div>
+            </a>
+          <% } %>
+        </div>
+      </div>
+
+    </nav>
+
+    <!-- Bottom Actions -->
+    <div class="p-3 border-t border-white/10 space-y-1.5 bg-black/15">
+      <a href="/" target="_blank" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+        <span class="flex items-center gap-2">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-emerald-400"></i>
+          <span>View Live Store</span>
+        </span>
+        <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-bold uppercase">Online</span>
+      </a>
+
+      <a href="/admin/logout" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-300 hover:bg-rose-950/40 transition-colors font-medium">
+        <i class="fa-solid fa-arrow-right-from-bracket text-xs text-rose-400"></i>
+        <span>Sign Out</span>
+      </a>
+    </div>
+  </div>
+</aside>

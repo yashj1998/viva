@@ -1,0 +1,148 @@
+<%- include('../partials/head') %>
+<%- include('../partials/utility-bar') %>
+<%- include('../partials/header') %>
+<%- include('../partials/nav-bar') %>
+
+<main class="min-h-[75vh] bg-[#fafaf9] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+  <div class="max-w-md w-full space-y-6">
+    
+    <!-- Card Container -->
+    <div class="bg-white rounded-3xl border border-gray-200/80 p-8 sm:p-10 shadow-sm space-y-6">
+      
+      <!-- Heading & Brand -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#123524]/5 text-[#123524] mb-1">
+          <i class="fa-solid fa-user-plus text-lg"></i>
+        </div>
+        <h1 class="font-heading font-bold text-2xl text-[#123524] tracking-tight">Create Your Account</h1>
+        <p class="text-xs text-gray-500">Join ViVA to enjoy express checkout, order delivery updates, and member perks.</p>
+      </div>
+
+      <!-- Alerts -->
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600 shrink-0 text-sm"></i>
+          <span><%= error %></span>
+        </div>
+      <% } %>
+
+      <!-- Register Form -->
+      <form action="/register" method="POST" class="space-y-4 text-xs">
+        <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '/account' %>">
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1.5">Full Name *</label>
+          <div class="relative">
+            <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="text" 
+              name="name" 
+              required 
+              value="<%= typeof formData !== 'undefined' && formData.name ? formData.name : '' %>"
+              placeholder="e.g. Jessica Taylor" 
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1.5">Email Address *</label>
+          <div class="relative">
+            <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="email" 
+              name="email" 
+              required 
+              value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+              placeholder="you@example.com" 
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1.5">Mobile Phone (Optional)</label>
+          <div class="relative">
+            <i class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="tel" 
+              name="phone" 
+              value="<%= typeof formData !== 'undefined' && formData.phone ? formData.phone : '' %>"
+              placeholder="+1 (555) 000-0000" 
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1.5">Password *</label>
+            <input 
+              type="password" 
+              name="password" 
+              required 
+              minlength="6"
+              placeholder="Min 6 chars" 
+              class="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1.5">Confirm Password *</label>
+            <input 
+              type="password" 
+              name="confirmPassword" 
+              required 
+              minlength="6"
+              placeholder="Re-enter password" 
+              class="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+          </div>
+        </div>
+
+        <div class="pt-1">
+          <label class="inline-flex items-center gap-2 cursor-pointer font-medium text-gray-600">
+            <input type="checkbox" required checked class="rounded text-[#123524] focus:ring-[#123524]">
+            <span>I agree to ViVA's <a href="#" class="text-emerald-700 underline">Terms of Service</a> &amp; <a href="#" class="text-emerald-700 underline">Privacy Policy</a></span>
+          </label>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 px-4 bg-[#123524] hover:bg-[#1a4b33] text-white text-xs font-bold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2"
+        >
+          <span>Create My ViVA Account</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </form>
+
+      <!-- Benefits Callout -->
+      <div class="pt-2 border-t border-gray-100 grid grid-cols-3 gap-2 text-center text-[10px] text-gray-500 font-medium">
+        <div class="p-2 rounded-xl bg-gray-50/80">
+          <i class="fa-solid fa-truck-fast text-emerald-700 text-sm mb-1 block"></i>
+          <span>Track Orders</span>
+        </div>
+        <div class="p-2 rounded-xl bg-gray-50/80">
+          <i class="fa-solid fa-shield-halved text-emerald-700 text-sm mb-1 block"></i>
+          <span>Safe &amp; Secure</span>
+        </div>
+        <div class="p-2 rounded-xl bg-gray-50/80">
+          <i class="fa-solid fa-gift text-emerald-700 text-sm mb-1 block"></i>
+          <span>Member Deals</span>
+        </div>
+      </div>
+
+      <!-- Footer switch to Login -->
+      <div class="text-center pt-2 border-t border-gray-100 text-xs text-gray-500">
+        Already have a ViVA account?
+        <a href="/login<%= typeof redirect !== 'undefined' && redirect ? ('?redirect=' + encodeURIComponent(redirect)) : '' %>" class="font-bold text-[#123524] hover:underline ml-1">
+          Sign In &rarr;
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

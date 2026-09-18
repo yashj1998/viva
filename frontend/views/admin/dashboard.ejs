@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'ViVA Seller Dashboard' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+  
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Welcome & Filter Header -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-heading font-bold text-lg text-[#123524]">
+              Welcome, <%= (typeof currentUser !== 'undefined' && currentUser.name) ? currentUser.name : 'Store Manager' %> 👋
+            </h2>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full <%= (typeof currentUser !== 'undefined' && currentUser.role === 'seller') ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-800' %>">
+              <%= (typeof currentUser !== 'undefined' && currentUser.role === 'seller') ? 'Active Seller' : 'Super Admin' %>
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 mt-0.5">
+            <%= (typeof currentUser !== 'undefined' && currentUser.role === 'seller') ? 'Live store dashboard scoped exclusively to your seller inventory and orders.' : 'Storewide real-time operations, database analytics, and fulfillment status.' %>
+          </p>
+        </div>
+
+        <!-- Date Range Filter & Actions -->
+        <div class="flex items-center gap-3 flex-wrap">
+          <% if (!isSeller && sellers && sellers.length > 0) { %>
+            <!-- Seller Filter Dropdown for Admin -->
+            <form method="GET" action="/admin" class="flex items-center gap-1.5 bg-amber-50/70 border border-amber-300/80 px-2.5 py-1.5 rounded-xl text-xs">
+              <input type="hidden" name="range" value="<%= typeof currentRange !== 'undefined' ? currentRange : '30d' %>">
+              <i class="fa-solid fa-store text-amber-800 text-[11px]"></i>
+              <label for="sellerSelect" class="font-bold text-amber-900 hidden sm:inline text-[11px]">Store:</label>
+              <select id="sellerSelect" name="sellerId" onchange="this.form.submit()" class="bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-semibold text-gray-800 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="">Global Storefront (All)</option>
+                <% sellers.forEach(s => { %>
+                  <option value="<%= s._id %>" <%= (selectedSellerId == s._id.toString()) ? 'selected' : '' %>>
+                    <%= s.storeName || s.name %>
+                  </option>
+                <% }) %>
+              </select>
+              <% if (selectedSellerId) { %>
+                <a href="/admin?range=<%= typeof currentRange !== 'undefined' ? currentRange : '30d' %>" class="text-[10px] text-amber-800 hover:text-amber-950 font-bold ml-1" title="Clear seller filter">
+                  &times;
+                </a>
+              <% } %>
+            </form>
+          <% } %>
+
+          <!-- Range Pills -->
+          <div class="flex items-center bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+            <a href="/admin?range=7d<%= selectedSellerId ? ('&sellerId=' + selectedSellerId) : '' %>" class="px-3 py-1.5 rounded-lg transition-colors <%= (typeof currentRange !== 'undefined' && currentRange === '7d') ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              7 Days
+            </a>
+            <a href="/admin?range=30d<%= selectedSellerId ? ('&sellerId=' + selectedSellerId) : '' %>" class="px-3 py-1.5 rounded-lg transition-colors <%= (typeof currentRange === 'undefined' || currentRange === '30d') ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              30 Days
+            </a>
+            <a href="/admin?range=month<%= selectedSellerId ? ('&sellerId=' + selectedSellerId) : '' %>" class="px-3 py-1.5 rounded-lg transition-colors <%= (typeof currentRange !== 'undefined' && currentRange === 'month') ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              This Month
+            </a>
+            <a href="/admin?range=all<%= selectedSellerId ? ('&sellerId=' + selectedSellerId) : '' %>" class="px-3 py-1.5 rounded-lg transition-colors <%= (typeof currentRange !== 'undefined' && currentRange === 'all') ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              All Time
+            </a>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <a href="/admin/products" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#123524] text-white text-xs font-semibold hover:bg-[#1a4b33] transition-colors shadow-xs">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Product
+          </a>
+          <a href="/admin/inventory" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/15 text-amber-900 border border-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition-colors">
+            <i class="fa-solid fa-warehouse text-[11px] text-amber-700"></i> Manage Stock
+          </a>
+        </div>
+      </div>
+
+      <% if (selectedSellerId) { %>
+        <% const activeSellerDoc = (sellers || []).find(s => s._id.toString() === selectedSellerId.toString()); %>
+        <% if (activeSellerDoc) { %>
+          <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 text-amber-900">
+              <i class="fa-solid fa-store text-amber-700 text-sm"></i>
+              <span>Currently previewing scoped seller database for <strong><%= activeSellerDoc.storeName || activeSellerDoc.name %></strong> (<%= activeSellerDoc.email %>)</span>
+            </div>
+            <a href="/admin?range=<%= typeof currentRange !== 'undefined' ? currentRange : '30d' %>" class="px-3 py-1 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 rounded-lg font-bold text-[11px] transition-colors">
+              Reset to Global
+            </a>
+          </div>
+        <% } %>
+      <% } %>
+
+      <!-- KPI Metric Cards Grid (6 cards) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <!-- Card 1: Gross Revenue -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[10px] font-semibold uppercase tracking-wider">Gross Sales</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-dollar-sign"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl text-[#123524]">
+            $<%= stats.totalRevenue %>
+          </div>
+          <p class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-database text-[9px]"></i> Live Database
+          </p>
+        </div>
+
+        <!-- Card 2: Total Orders -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[10px] font-semibold uppercase tracking-wider">Total Orders</span>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl text-[#123524]">
+            <%= stats.totalOrders %>
+          </div>
+          <p class="text-[10px] text-gray-500 font-medium"><%= (typeof currentRange !== 'undefined' && currentRange === '7d') ? 'Past 7 days' : 'Selected range' %></p>
+        </div>
+
+        <!-- Card 3: Pending Orders -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[10px] font-semibold uppercase tracking-wider">Pending Action</span>
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl text-amber-700">
+            <%= stats.pendingOrders || 0 %>
+          </div>
+          <p class="text-[10px] text-amber-700 font-semibold">Ordered / Processing</p>
+        </div>
+
+        <!-- Card 4: Catalog Products -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[10px] font-semibold uppercase tracking-wider">Products</span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl text-[#123524]">
+            <%= stats.totalProducts %>
+          </div>
+          <p class="text-[10px] text-gray-500 font-medium">Active listings</p>
+        </div>
+
+        <!-- Card 5: Total Customers -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[10px] font-semibold uppercase tracking-wider">Customers</span>
+            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl text-[#123524]">
+            <%= stats.totalCustomers %>
+          </div>
+          <p class="text-[10px] text-gray-500 font-medium">Storefront accounts</p>
+        </div>
+
+        <!-- Card 6: Low Stock Warnings -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-1.5">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[10px] font-semibold uppercase tracking-wider">Low Stock</span>
+            <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl <%= stats.lowStockCount > 0 ? 'text-rose-600' : 'text-gray-800' %>">
+            <%= stats.lowStockCount || 0 %>
+          </div>
+          <p class="text-[10px] <%= stats.lowStockCount > 0 ? 'text-rose-600 font-semibold' : 'text-gray-400 font-medium' %>">
+            <%= stats.lowStockCount > 0 ? 'Items need restock' : 'Healthy inventory' %>
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Charts Section: Real Revenue Trend & Category Doughnut -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Revenue & Orders Trend (2 cols) -->
+        <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Sales &amp; Orders Trend</h3>
+              <p class="text-[11px] text-gray-400">Aggregated from verified database orders for <%= (typeof currentRange !== 'undefined' && currentRange === '7d') ? 'the last 7 days' : ((typeof currentRange !== 'undefined' && currentRange === 'month') ? 'this month' : 'the past 30 days') %></p>
+            </div>
+            <span class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live Sync
+            </span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="salesTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Category Distribution (1 col) -->
+        <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Category Distribution</h3>
+              <p class="text-[11px] text-gray-400">Catalog inventory allocation</p>
+            </div>
+          </div>
+          <div class="h-64 relative flex items-center justify-center">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-Column Operational Grid: Top Selling Products & Low Stock Alerts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Top Selling Products -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-trophy text-amber-500 text-xs"></i>
+              <h3 class="font-heading font-bold text-xs text-[#123524]">Top Selling Products</h3>
+            </div>
+            <a href="/admin/products" class="text-[11px] text-emerald-700 font-semibold hover:underline">Full Catalog &rarr;</a>
+          </div>
+          <div class="divide-y divide-gray-100 text-xs">
+            <% if (topSellingProducts && topSellingProducts.length > 0) { %>
+              <% topSellingProducts.forEach((prod, idx) => { %>
+                <div class="p-3.5 flex items-center justify-between hover:bg-gray-50/70 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <span class="w-5 text-center font-bold text-gray-400 font-mono text-[11px]">#<%= idx + 1 %></span>
+                    <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 p-1 flex items-center justify-center">
+                      <img src="<%= prod.image %>" alt="<%= prod.name %>" class="max-h-full max-w-full object-contain">
+                    </div>
+                    <div>
+                      <div class="font-bold text-gray-900 line-clamp-1 max-w-xs"><%= prod.name %></div>
+                      <div class="text-[10px] text-gray-400 font-mono"><%= prod.sku %></div>
+                    </div>
+                  </div>
+                  <div class="text-right whitespace-nowrap">
+                    <div class="font-bold text-[#123524]">$<%= prod.revenue.toFixed(2) %></div>
+                    <span class="text-[10px] text-emerald-600 font-semibold"><%= prod.unitsSold %> sold</span>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="p-8 text-center text-gray-400 text-xs">No orders recorded in this date range</div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-rose-600 text-xs"></i>
+              <h3 class="font-heading font-bold text-xs text-[#123524]">Low Stock Products Alert</h3>
+            </div>
+            <a href="/admin/inventory" class="text-[11px] text-emerald-700 font-semibold hover:underline">Manage Inventory &rarr;</a>
+          </div>
+          <div class="divide-y divide-gray-100 text-xs">
+            <% if (lowStockProducts && lowStockProducts.length > 0) { %>
+              <% lowStockProducts.forEach(prod => { %>
+                <div class="p-3.5 flex items-center justify-between hover:bg-gray-50/70 transition-colors">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 p-1 flex items-center justify-center">
+                      <img src="<%= prod.primaryImageUrl %>" alt="<%= prod.name %>" class="max-h-full max-w-full object-contain">
+                    </div>
+                    <div>
+                      <div class="font-bold text-gray-900 line-clamp-1 max-w-xs"><%= prod.name %></div>
+                      <div class="text-[10px] text-gray-400 font-mono"><%= prod.sku || prod.slug %></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="text-right">
+                      <div class="font-bold <%= prod.stockQuantity <= 0 ? 'text-rose-600' : 'text-amber-700' %>">
+                        <%= prod.stockQuantity <= 0 ? 'OUT OF STOCK' : `${prod.stockQuantity} units left` %>
+                      </div>
+                      <span class="text-[10px] text-gray-400">Threshold: <%= prod.lowStockThreshold || 10 %></span>
+                    </div>
+                    <a href="/admin/inventory?search=<%= encodeURIComponent(prod.sku || prod.name) %>" class="px-2.5 py-1 rounded-lg bg-[#123524] text-white font-bold text-[10px] hover:bg-[#1a4b33] transition-colors">
+                      Restock
+                    </a>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="p-8 text-center text-emerald-600 text-xs font-semibold">
+                <i class="fa-solid fa-circle-check text-base mb-1 block text-emerald-500"></i>
+                All inventory levels are above their thresholds!
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3-Column Operational Grids: Recent Orders, Inquiries, Audit Logs -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Column 1: Recent Orders -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-receipt text-emerald-700 text-xs"></i>
+              <h3 class="font-heading font-bold text-xs text-[#123524]">Recent Orders</h3>
+            </div>
+            <a href="/admin/orders" class="text-[11px] text-emerald-700 font-semibold hover:underline">View All &rarr;</a>
+          </div>
+          <div class="divide-y divide-gray-100 text-xs">
+            <% if (recentOrders && recentOrders.length > 0) { %>
+              <% recentOrders.forEach(order => { %>
+                <div class="p-3.5 flex items-center justify-between hover:bg-gray-50/70 transition-colors">
+                  <div>
+                    <div class="font-bold text-gray-900">#<%= order.orderNumber %></div>
+                    <div class="text-[11px] text-gray-500"><%= order.customer ? order.customer.name : 'Customer' %></div>
+                    <div class="text-[10px] text-gray-400"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-bold text-gray-900">$<%= order.total.toFixed(2) %></div>
+                    <span class="inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-0.5 <%= order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : (order.status === 'Shipped' ? 'bg-indigo-100 text-indigo-800' : (order.status === 'Processing' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')) %>">
+                      <%= order.status %>
+                    </span>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="p-6 text-center text-gray-400 text-xs">No recent orders recorded</div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Column 2: Recent Inquiries -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-regular fa-comment-dots text-emerald-700 text-xs"></i>
+              <h3 class="font-heading font-bold text-xs text-[#123524]">Customer Support Hub</h3>
+            </div>
+            <a href="/admin/inquiries" class="text-[11px] text-emerald-700 font-semibold hover:underline">Support &rarr;</a>
+          </div>
+          <div class="divide-y divide-gray-100 text-xs">
+            <% if (recentInquiries && recentInquiries.length > 0) { %>
+              <% recentInquiries.forEach(inq => { %>
+                <div class="p-3.5 space-y-1 hover:bg-gray-50/70 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-gray-900 truncate max-w-[140px]"><%= inq.name %></span>
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-full <%= inq.status === 'New' ? 'bg-rose-100 text-rose-800' : (inq.status === 'In Progress' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800') %>">
+                      <%= inq.status %>
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-gray-600 font-medium line-clamp-1"><%= inq.subject %></p>
+                  <p class="text-[10px] text-gray-400 line-clamp-1"><%= inq.message %></p>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="p-6 text-center text-gray-400 text-xs">No pending customer messages</div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Column 3: Live Audit Trail -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-emerald-700 text-xs"></i>
+              <h3 class="font-heading font-bold text-xs text-[#123524]">Security &amp; Audit Trail</h3>
+            </div>
+            <a href="/admin/audit-logs" class="text-[11px] text-emerald-700 font-semibold hover:underline">Full Log &rarr;</a>
+          </div>
+          <div class="divide-y divide-gray-100 text-xs">
+            <% if (recentAuditLogs && recentAuditLogs.length > 0) { %>
+              <% recentAuditLogs.forEach(log => { %>
+                <div class="p-3 hover:bg-gray-50/70 transition-colors space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-700">
+                      <%= log.action %>
+                    </span>
+                    <span class="text-[10px] text-gray-400">
+                      <%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-gray-700 line-clamp-1 font-medium"><%= log.details || log.module %></p>
+                  <div class="text-[10px] text-gray-400">By: <%= log.userEmail %></div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="p-6 text-center text-gray-400 text-xs">No audit logs recorded yet</div>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Chart.js Setup Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Sales Trend Chart from real database aggregation
+      const trendData = <%- JSON.stringify(revenueTrend || []) %>;
+      const trendLabels = trendData.map(d => d.label);
+      const trendSales = trendData.map(d => d.revenue);
+      const trendOrders = trendData.map(d => d.orders);
+
+      const ctxSales = document.getElementById('salesTrendChart')?.getContext('2d');
+      if (ctxSales) {
+        new Chart(ctxSales, {
+          type: 'line',
+          data: {
+            labels: trendLabels,
+            datasets: [
+              {
+                label: 'Revenue ($)',
+                data: trendSales,
+                borderColor: '#123524',
+                backgroundColor: 'rgba(18, 53, 36, 0.08)',
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.35,
+                yAxisID: 'y'
+              },
+              {
+                label: 'Orders',
+                data: trendOrders,
+                borderColor: '#eab308',
+                backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                borderWidth: 2,
+                borderDash: [4, 4],
+                fill: false,
+                tension: 0.3,
+                yAxisID: 'y1'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+              tooltip: { padding: 10, cornerRadius: 8 }
+            },
+            scales: {
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: { callback: v => '$' + v }
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: { drawOnChartArea: false },
+                ticks: { stepSize: 1 }
+              },
+              x: {
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Category Doughnut Chart from real database aggregation
+      const catData = <%- JSON.stringify(categoryBreakdown || []) %>;
+      const catLabels = catData.map(c => c.name);
+      const catCounts = catData.map(c => c.count);
+
+      const ctxCat = document.getElementById('categoryChart')?.getContext('2d');
+      if (ctxCat && catLabels.length > 0) {
+        new Chart(ctxCat, {
+          type: 'doughnut',
+          data: {
+            labels: catLabels,
+            datasets: [{
+              data: catCounts,
+              backgroundColor: [
+                '#123524',
+                '#2d6a4f',
+                '#52b788',
+                '#74c69d',
+                '#d8f3dc',
+                '#eab308',
+                '#f59e0b',
+                '#6366f1'
+              ],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

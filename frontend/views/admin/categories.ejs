@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Manage Categories — ViVA Admin' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+  
+  <%- include('sidebar') %>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Notifications -->
+      <% if (message) { %>
+        <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Top Header & Add Category Card -->
+      <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div>
+            <h2 class="font-heading font-bold text-base text-[#123524] flex items-center gap-2">
+              <i class="fa-solid fa-plus-circle text-emerald-700"></i>
+              <span>Create New Category</span>
+            </h2>
+            <p class="text-xs text-gray-500 mt-0.5">Categories power the circular navigation strip on the storefront homepage, mega-menu, and product filtering.</p>
+          </div>
+        </div>
+
+        <form action="/admin/categories/new" method="POST" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end text-xs">
+          <div class="space-y-1">
+            <label class="font-bold text-gray-700">Category Name *</label>
+            <input type="text" name="name" required placeholder="e.g. Gaming &amp; VR" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#123524] focus:ring-1 focus:ring-[#123524]">
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-gray-700">Font Awesome Icon Class</label>
+            <input type="text" name="iconClass" value="fa-solid fa-gamepad" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#123524]">
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-gray-700">Background Tint Swatch</label>
+            <div class="flex items-center gap-2">
+              <input type="color" name="bgColor" value="#eef1e6" class="w-10 h-8 p-0.5 border border-gray-200 rounded-lg cursor-pointer bg-white">
+              <span class="text-xs text-gray-500 font-mono">Pastel tint</span>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-gray-700">Sort Order</label>
+            <input type="number" name="sortOrder" value="10" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none">
+          </div>
+
+          <div>
+            <button type="submit" class="w-full bg-[#123524] hover:bg-[#1a4b33] text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-colors shadow-xs flex items-center justify-center gap-2">
+              <i class="fa-solid fa-folder-plus text-xs"></i>
+              <span>Save Category</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Categories Data Table -->
+      <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div>
+            <h2 class="font-heading font-bold text-base text-[#123524] flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-emerald-700"></i>
+              <span>Active Storefront Categories (<%= (categories || []).length %>)</span>
+            </h2>
+            <p class="text-xs text-gray-500 mt-0.5">List of all active storefront taxonomies visible to consumers.</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="text-gray-400 uppercase tracking-wider text-[10px] border-b border-gray-100 bg-gray-50/70">
+                <th class="py-3 px-4">Badge Preview</th>
+                <th class="py-3 px-4">Category Name</th>
+                <th class="py-3 px-4">URL Slug</th>
+                <th class="py-3 px-4">Assigned Products</th>
+                <th class="py-3 px-4">Icon Class</th>
+                <th class="py-3 px-4">Color Tint</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% (categories || []).forEach(function(cat) { %>
+                <tr class="hover:bg-gray-50/70 transition-colors">
+                  <td class="py-3 px-4">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center shadow-2xs" style="background-color: <%= cat.bgColor || '#f3efe3' %>;">
+                      <i class="<%= cat.iconClass || 'fa-solid fa-shapes' %> text-xs" style="color: <%= cat.iconColor || '#123524' %>;"></i>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 font-bold text-gray-900">
+                    <%= cat.name %>
+                  </td>
+                  <td class="py-3 px-4 font-mono text-[11px] text-gray-500">
+                    /<%= cat.slug %>
+                  </td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-[10px] font-bold">
+                      <%= cat.productCount || 0 %> products
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 font-mono text-[11px] text-gray-500">
+                    <%= cat.iconClass || 'fa-solid fa-shapes' %>
+                  </td>
+                  <td class="py-3 px-4">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-3.5 h-3.5 rounded-full border border-gray-300 shadow-2xs" style="background-color: <%= cat.bgColor || '#f3efe3' %>;"></span>
+                      <span class="font-mono text-[11px] text-gray-500"><%= cat.bgColor || '#f3efe3' %></span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                    <a href="/shop?category=<%= encodeURIComponent(cat.name) %>" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:underline bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                      <span>View</span>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                    </a>
+                    <form action="/admin/categories/delete/<%= cat._id || cat.slug %>" method="POST" onsubmit="return confirm('Delete this category?')" class="inline">
+                      <button type="submit" class="p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors" title="Delete Category">
+                        <i class="fa-regular fa-trash-can text-xs"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

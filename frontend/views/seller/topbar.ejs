@@ -1,0 +1,273 @@
+<% const seller = typeof currentSeller !== 'undefined' ? currentSeller : (typeof currentUser !== 'undefined' ? currentUser : {}); %>
+<% const current = typeof activePage !== 'undefined' ? activePage : 'dashboard'; %>
+
+<header class="bg-white border-b border-gray-200/80 px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 sticky top-0 z-20 shadow-2xs">
+  <!-- Left: Mobile Menu Trigger & Store Identity -->
+  <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+    <!-- Mobile Hamburger Toggle -->
+    <button 
+      type="button" 
+      onclick="openMobileSellerDrawer()"
+      class="md:hidden text-gray-600 hover:text-[#123524] p-2 rounded-xl border border-gray-200 hover:bg-gray-50 focus:outline-none transition-colors"
+      aria-label="Toggle Seller Navigation Menu"
+    >
+      <i class="fa-solid fa-bars text-sm"></i>
+    </button>
+
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Store Live</span>
+      </span>
+      <span class="text-xs text-gray-400 hidden sm:inline">&bull;</span>
+      <span class="text-xs font-bold text-gray-800 truncate hidden sm:inline max-w-[140px] md:max-w-[200px] lg:max-w-xs">
+        <%= seller.storeName || 'Apex Audio & Living Studio' %>
+      </span>
+    </div>
+  </div>
+
+  <!-- Right: Quick Actions & Profile -->
+  <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+    <!-- Quick Add Product -->
+    <a 
+      href="/seller/products" 
+      class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#123524] hover:bg-[#1a4b33] text-white text-xs font-bold transition-colors shadow-2xs"
+      title="Add new product listing"
+    >
+      <i class="fa-solid fa-plus text-[10px]"></i>
+      <span class="hidden sm:inline">Add Product</span>
+    </a>
+
+    <!-- Live Storefront Link -->
+    <a 
+      href="/" 
+      target="_blank"
+      class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold transition-colors"
+      title="View customer storefront"
+    >
+      <i class="fa-solid fa-store text-emerald-700 text-[11px]"></i>
+      <span class="hidden sm:inline">Storefront</span>
+    </a>
+
+    <!-- Profile Dropdown Container -->
+    <div class="relative group">
+      <button 
+        type="button" 
+        class="flex items-center gap-1 sm:gap-2 p-1 rounded-xl hover:bg-gray-100 transition-colors focus:outline-none cursor-pointer"
+        aria-label="Merchant account menu"
+      >
+        <div class="w-8 h-8 rounded-full bg-[#123524] text-white flex items-center justify-center font-bold text-xs shadow-2xs overflow-hidden border border-emerald-900/30">
+          <img src="<%= seller.avatarUrl || '/images/avatars/priya.jpg' %>" alt="Avatar" class="w-full h-full object-cover" onerror="this.style.display='none'">
+          <span class="hidden"><%= (seller.name || 'S').charAt(0).toUpperCase() %></span>
+        </div>
+        <i class="fa-solid fa-chevron-down text-[9px] text-gray-400 group-hover:rotate-180 transition-transform duration-200 hidden sm:inline"></i>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div class="absolute right-0 top-full pt-2 w-56 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 z-50">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-xl p-3 space-y-2 text-xs">
+          <div class="border-b border-gray-100 pb-2">
+            <div class="font-bold text-gray-900 truncate"><%= seller.name || 'Seller Partner' %></div>
+            <div class="text-[11px] text-gray-500 font-mono truncate"><%= seller.email || 'seller@viva.com' %></div>
+            <span class="inline-block mt-1 bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase truncate max-w-full">
+              <%= seller.storeName || 'Merchant' %>
+            </span>
+          </div>
+
+          <div class="space-y-0.5">
+            <a href="/seller/profile" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
+              <i class="fa-solid fa-id-card text-gray-400 w-4 text-center"></i>
+              <span>Store Settings</span>
+            </a>
+            <a href="/seller/analytics" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
+              <i class="fa-solid fa-chart-line text-gray-400 w-4 text-center"></i>
+              <span>Sales Performance</span>
+            </a>
+            <% if (typeof currentUser !== 'undefined' && currentUser.role === 'admin') { %>
+              <a href="/admin" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-900 font-semibold transition-colors">
+                <i class="fa-solid fa-shield-halved text-emerald-700 w-4 text-center"></i>
+                <span>Platform Admin</span>
+              </a>
+            <% } %>
+          </div>
+
+          <div class="pt-2 border-t border-gray-100">
+            <a href="/seller/logout" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-colors">
+              <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer (Full Height Slide-out) -->
+<div id="mobileSellerDrawer" class="fixed inset-0 bg-black/60 z-50 md:hidden hidden transition-opacity duration-300" onclick="handleDrawerBackdrop(event)">
+  <div id="mobileDrawerPanel" class="w-72 max-w-[85vw] bg-[#123524] text-white h-full p-4 flex flex-col justify-between overflow-y-auto shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out" onclick="event.stopPropagation()">
+    <div class="space-y-4">
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <a href="/seller/dashboard" class="flex items-center gap-2 group">
+          <div class="w-8 h-8 rounded-xl bg-amber-400 text-[#123524] flex items-center justify-center font-bold text-sm shadow-xs">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <div>
+            <div class="font-heading font-bold text-sm text-white leading-tight">ViVA Seller</div>
+            <span class="text-[9px] uppercase tracking-wider text-emerald-300 font-semibold block">Merchant Hub</span>
+          </div>
+        </a>
+        <button onclick="closeMobileSellerDrawer()" class="text-white/60 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors" aria-label="Close menu">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Store Profile Box -->
+      <div class="p-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-2xs border border-white/20">
+          <img src="<%= seller.logoUrl || '/images/viva-logo.png' %>" alt="Store Logo" class="max-h-full max-w-full object-contain" onerror="this.src='/images/viva-logo.png'">
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="text-xs font-bold text-white truncate flex items-center gap-1">
+            <span class="truncate"><%= seller.storeName || 'My Store' %></span>
+            <i class="fa-solid fa-circle-check text-amber-400 text-[10px]" title="Verified"></i>
+          </div>
+          <div class="text-[10px] text-emerald-300 font-mono truncate">
+            <%= seller.email || 'seller@viva.com' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Links with Active Highlighting -->
+      <nav class="space-y-1 text-xs">
+        <div class="px-3 py-1 text-[10px] font-bold text-white/40 uppercase tracking-wider">
+          Store Operations
+        </div>
+
+        <a 
+          href="/seller/dashboard" 
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'dashboard' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+        >
+          <i class="fa-solid fa-chart-pie text-sm w-4 text-center"></i>
+          <span>Dashboard Overview</span>
+        </a>
+
+        <a 
+          href="/seller/products" 
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'products' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+        >
+          <i class="fa-solid fa-boxes-stacked text-sm w-4 text-center"></i>
+          <span>Products Catalog</span>
+        </a>
+
+        <a 
+          href="/seller/orders" 
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'orders' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+        >
+          <i class="fa-solid fa-receipt text-sm w-4 text-center"></i>
+          <span>Orders &amp; Fulfillment</span>
+        </a>
+
+        <a 
+          href="/seller/inventory" 
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'inventory' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+        >
+          <i class="fa-solid fa-warehouse text-sm w-4 text-center"></i>
+          <span>Stock &amp; Inventory</span>
+        </a>
+
+        <div class="px-3 pt-3 pb-1 text-[10px] font-bold text-white/40 uppercase tracking-wider">
+          Store Growth &amp; Brand
+        </div>
+
+        <a 
+          href="/seller/analytics" 
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'analytics' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+        >
+          <i class="fa-solid fa-chart-line text-sm w-4 text-center"></i>
+          <span>Sales Analytics</span>
+        </a>
+
+        <a 
+          href="/seller/profile" 
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'profile' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+        >
+          <i class="fa-solid fa-id-card text-sm w-4 text-center"></i>
+          <span>Store Profile &amp; Policies</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Footer Utilities -->
+    <div class="pt-4 border-t border-white/10 space-y-2 text-xs">
+      <a 
+        href="/" 
+        target="_blank"
+        class="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-emerald-200 transition-colors"
+      >
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+          <span>View Live Storefront</span>
+        </div>
+        <i class="fa-solid fa-chevron-right text-[9px] opacity-60"></i>
+      </a>
+
+      <% if (typeof currentUser !== 'undefined' && currentUser.role === 'admin') { %>
+        <a 
+          href="/admin" 
+          class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 font-semibold transition-colors"
+        >
+          <i class="fa-solid fa-shield-halved text-[11px]"></i>
+          <span>Platform Admin Console</span>
+        </a>
+      <% } %>
+
+      <a 
+        href="/seller/logout" 
+        class="flex items-center gap-2 px-3 py-2 rounded-xl text-rose-300 hover:bg-rose-500/10 transition-colors font-semibold"
+      >
+        <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
+        <span>Sign Out</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openMobileSellerDrawer() {
+    const drawer = document.getElementById('mobileSellerDrawer');
+    const panel = document.getElementById('mobileDrawerPanel');
+    if (drawer && panel) {
+      drawer.classList.remove('hidden');
+      setTimeout(() => {
+        panel.classList.remove('-translate-x-full');
+      }, 10);
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeMobileSellerDrawer() {
+    const drawer = document.getElementById('mobileSellerDrawer');
+    const panel = document.getElementById('mobileDrawerPanel');
+    if (drawer && panel) {
+      panel.classList.add('-translate-x-full');
+      setTimeout(() => {
+        drawer.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+  }
+
+  function handleDrawerBackdrop(e) {
+    if (e.target.id === 'mobileSellerDrawer') {
+      closeMobileSellerDrawer();
+    }
+  }
+
+  // Close drawer on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMobileSellerDrawer();
+  });
+</script>
+

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Global Settings — ViVA Admin' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+  
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto max-w-5xl">
+      
+      <!-- Feedback Message -->
+      <% if (message) { %>
+        <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="font-heading font-bold text-xl text-[#123524]">Website, SEO &amp; Global Store Settings</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Control live storefront branding, announcement banner, SEO meta tags, and checkout policies.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 text-xs font-bold transition-colors shadow-2xs">
+            <i class="fa-solid fa-eye text-emerald-700 text-xs"></i> View Live Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Announcement Bar Preview -->
+      <div class="bg-white rounded-2xl border border-gray-200/80 p-4 shadow-xs space-y-2">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-xs"></i> Live Announcement Bar Preview
+        </span>
+        <div class="bg-[#123524] text-white py-2 px-4 rounded-xl text-xs text-center font-medium shadow-inner flex items-center justify-center gap-2" id="announcementPreview">
+          <i class="fa-solid fa-truck-fast text-emerald-400 text-xs"></i>
+          <span id="previewText"><%= settings.announcementText %></span>
+        </div>
+        <p class="text-[10px] text-gray-400">This banner renders at the very top of your storefront header for all visitors.</p>
+      </div>
+
+      <!-- Settings Form -->
+      <form action="/admin/settings/update" method="POST" class="space-y-6">
+        
+        <!-- Section 1: Store Branding & Live Announcement -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-store text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Store Identity &amp; Announcement Bar</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Store Name</label>
+              <input type="text" name="storeName" value="<%= settings.storeName %>" required class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Store Tagline</label>
+              <input type="text" name="tagline" value="<%= settings.tagline %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block font-bold text-gray-700 mb-1">Top Announcement Message (Live Sync)</label>
+              <input 
+                type="text" 
+                name="announcementText" 
+                id="announcementInput" 
+                value="<%= settings.announcementText %>" 
+                oninput="document.getElementById('previewText').innerText = this.value" 
+                required 
+                class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              >
+              <p class="text-[10px] text-gray-400 mt-1">Displayed on the top utility bar across every page.</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Announcement Link URL</label>
+              <input type="text" name="announcementUrl" value="<%= settings.announcementUrl %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Shipping, Taxes & Currency -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-truck-ramp-box text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Shipping, Currency &amp; Pricing Policies</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Free Shipping Threshold ($)</label>
+              <input type="number" step="0.01" name="freeShippingThreshold" value="<%= settings.freeShippingThreshold %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <p class="text-[10px] text-gray-400 mt-1">Orders above this qualify for free standard shipping.</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Currency Symbol</label>
+              <input type="text" name="currencySymbol" value="<%= settings.currencySymbol %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Default Sales Tax Rate (%)</label>
+              <input type="number" step="0.1" name="taxRate" value="<%= settings.taxRate %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Customer Support & Contact Details -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-headset text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Support &amp; Store Contact</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Support Email</label>
+              <input type="email" name="supportEmail" value="<%= settings.supportEmail %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Support Phone</label>
+              <input type="text" name="supportPhone" value="<%= settings.supportPhone %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block font-bold text-gray-700 mb-1">Headquarters / Return Address</label>
+              <input type="text" name="address" value="<%= settings.address %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: SEO Metadata & OpenGraph -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-magnifying-glass-chart text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Search Engine Optimization (SEO) &amp; Social Previews</h3>
+          </div>
+
+          <div class="space-y-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Default Meta Title</label>
+              <input type="text" name="metaTitle" value="<%= settings.metaTitle %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <p class="text-[10px] text-gray-400 mt-1">Recommended length: 50-60 characters.</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Meta Description</label>
+              <textarea name="metaDescription" rows="2" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"><%= settings.metaDescription %></textarea>
+              <p class="text-[10px] text-gray-400 mt-1">Summarizes your storefront in Google search results (150-160 characters).</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-gray-700 mb-1">Meta Keywords</label>
+                <input type="text" name="metaKeywords" value="<%= settings.metaKeywords %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+
+              <div>
+                <label class="block font-bold text-gray-700 mb-1">OpenGraph Share Image URL</label>
+                <input type="text" name="ogImageUrl" value="<%= settings.ogImageUrl %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Google Analytics Measurement ID</label>
+              <input type="text" name="googleAnalyticsId" value="<%= settings.googleAnalyticsId %>" placeholder="G-XXXXXXXXXX" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Social Media Channels -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-share-nodes text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Social Media Channels</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">
+                <i class="fa-brands fa-facebook text-blue-600 mr-1"></i> Facebook
+              </label>
+              <input type="url" name="socialFacebook" value="<%= settings.socialFacebook %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">
+                <i class="fa-brands fa-instagram text-pink-600 mr-1"></i> Instagram
+              </label>
+              <input type="url" name="socialInstagram" value="<%= settings.socialInstagram %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">
+                <i class="fa-brands fa-x-twitter text-black mr-1"></i> Twitter / X
+              </label>
+              <input type="url" name="socialTwitter" value="<%= settings.socialTwitter %>" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Save Bar -->
+        <div class="sticky bottom-4 bg-white/95 backdrop-blur border border-gray-200/90 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+          <div class="text-xs text-gray-500 flex items-center gap-2">
+            <i class="fa-solid fa-arrows-rotate text-emerald-600"></i>
+            <span>Changes will reflect immediately across all storefront surfaces.</span>
+          </div>
+          <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#123524] text-white text-xs font-bold hover:bg-[#1a4b33] transition-colors shadow-xs">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Save Settings &amp; Sync
+          </button>
+        </div>
+
+      </form>
+    </main>
+  </div>
+
+</body>
+</html>

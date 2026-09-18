@@ -1,0 +1,156 @@
+<%- include('../partials/head') %>
+<%- include('../partials/utility-bar') %>
+<%- include('../partials/header') %>
+<%- include('../partials/nav-bar') %>
+
+<main class="min-h-[70vh] bg-[#fafaf9] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+  <div class="max-w-md w-full space-y-6">
+    
+    <!-- Card Container -->
+    <div class="bg-white rounded-3xl border border-gray-200/80 p-8 sm:p-10 shadow-sm space-y-6">
+      
+      <!-- Heading & Brand -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#123524]/5 text-[#123524] mb-1">
+          <i class="fa-solid fa-lock text-lg"></i>
+        </div>
+        <h1 class="font-heading font-bold text-2xl text-[#123524] tracking-tight">Welcome Back</h1>
+        <p class="text-xs text-gray-500">Sign in to your ViVA account to manage orders, track deliveries, and view saved items.</p>
+      </div>
+
+      <!-- Alerts -->
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-circle-check text-emerald-600 shrink-0 text-sm"></i>
+          <span><%= success %></span>
+        </div>
+      <% } %>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600 shrink-0 text-sm"></i>
+          <span><%= error %></span>
+        </div>
+      <% } %>
+
+      <!-- Login Form -->
+      <form action="/login" method="POST" class="space-y-4 text-xs">
+        <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '/account' %>">
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1.5">Email Address</label>
+          <div class="relative">
+            <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="email" 
+              name="email" 
+              id="loginEmail"
+              required 
+              placeholder="you@example.com" 
+              class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="font-bold text-gray-700">Password</label>
+            <a href="#" onclick="alert('Password reset link has been dispatched to your email address.'); return false;" class="text-[11px] font-semibold text-emerald-700 hover:underline">Forgot password?</a>
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="password" 
+              name="password" 
+              id="loginPassword"
+              required 
+              placeholder="••••••••" 
+              class="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-[#123524] focus:border-transparent outline-none transition-all text-xs"
+            >
+            <button 
+              type="button" 
+              onclick="togglePasswordVisibility('loginPassword', this)"
+              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <label class="inline-flex items-center gap-2 cursor-pointer font-medium text-gray-600">
+            <input type="checkbox" name="remember" checked class="rounded text-[#123524] focus:ring-[#123524]">
+            <span>Remember my session</span>
+          </label>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 px-4 bg-[#123524] hover:bg-[#1a4b33] text-white text-xs font-bold rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2"
+        >
+          <span>Sign In to Your Account</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </form>
+
+      <!-- Demo Accounts 1-Click Quick Fill -->
+      <div class="pt-2 border-t border-gray-100 space-y-2.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block text-center">
+          Quick Demo Accounts (1-Click Test)
+        </span>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <button 
+            type="button" 
+            onclick="fillDemo('alex@example.com', 'alex123')"
+            class="py-2 px-2.5 rounded-xl border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors text-left font-medium text-gray-700 flex flex-col"
+          >
+            <span class="font-bold text-[#123524]">Alex Morgan</span>
+            <span class="text-[10px] text-gray-400">alex@example.com</span>
+          </button>
+          <button 
+            type="button" 
+            onclick="fillDemo('sophia@example.com', 'sophia123')"
+            class="py-2 px-2.5 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors text-left font-medium text-gray-700 flex flex-col"
+          >
+            <span class="font-bold text-[#123524]">Sophia Chen</span>
+            <span class="text-[10px] text-gray-400">sophia@example.com</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer switch to Register -->
+      <div class="text-center pt-2 border-t border-gray-100 text-xs text-gray-500">
+        Don't have an account yet?
+        <a href="/register<%= typeof redirect !== 'undefined' && redirect ? ('?redirect=' + encodeURIComponent(redirect)) : '' %>" class="font-bold text-[#123524] hover:underline ml-1">
+          Create one now &rarr;
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>
+
+<script>
+  function togglePasswordVisibility(id, btn) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+
+  function fillDemo(email, pwd) {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = pwd;
+  }
+</script>

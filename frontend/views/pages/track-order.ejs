@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Tracking Header -->
+  <div class="bg-[#123524] text-white py-10 sm:py-14 text-center">
+    <div class="max-w-2xl mx-auto px-4 space-y-3">
+      <span class="text-xs font-bold uppercase tracking-widest text-emerald-300">Live Package Status</span>
+      <h1 class="font-heading font-bold text-3xl sm:text-4xl text-white tracking-tight">
+        Track Your Order
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-300">
+        Enter your order reference code and checkout email to view real-time delivery milestones.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Tracking Container -->
+  <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-8">
+    
+    <!-- Tracking Lookup Form Card -->
+    <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-2xs">
+      <form action="/track-order" method="POST" class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+        <div class="sm:col-span-5 space-y-1.5">
+          <label for="orderNumber" class="text-xs font-semibold text-gray-700">Order Reference #</label>
+          <input 
+            type="text" 
+            id="orderNumber" 
+            name="orderNumber" 
+            value="<%= order ? order.orderNumber : 'VIVA-9824' %>" 
+            required
+            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-[#16261d] font-mono uppercase focus:border-[#123524] outline-none"
+          >
+        </div>
+
+        <div class="sm:col-span-4 space-y-1.5">
+          <label for="email" class="text-xs font-semibold text-gray-700">Billing Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            value="<%= (typeof customer !== 'undefined' && customer && customer.email) ? customer.email : (order ? order.customerEmail : '') %>" 
+            required
+            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-[#16261d] focus:border-[#123524] outline-none"
+          >
+        </div>
+
+        <div class="sm:col-span-3">
+          <button 
+            type="submit" 
+            class="w-full bg-[#123524] hover:bg-[#17422e] text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition-colors shadow-xs cursor-pointer"
+          >
+            Track Package
+          </button>
+        </div>
+
+        <% if (typeof customerOrders !== 'undefined' && customerOrders && customerOrders.length > 0) { %>
+          <div class="sm:col-span-12 pt-3 border-t border-gray-100 flex items-center gap-2 flex-wrap text-xs">
+            <span class="text-gray-500 font-medium">Your Recent Orders:</span>
+            <% customerOrders.forEach(co => { %>
+              <a href="/track-order?order=<%= co.orderNumber %>" class="px-2.5 py-1 rounded-full bg-emerald-50 text-[#123524] hover:bg-emerald-100 font-mono font-bold text-[11px] transition-colors border border-emerald-200/60 flex items-center gap-1.5">
+                <span>#<%= co.orderNumber %></span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded-full <%= co.status === 'Delivered' ? 'bg-emerald-200 text-emerald-900' : 'bg-blue-100 text-blue-900' %>"><%= co.status %></span>
+              </a>
+            <% }) %>
+          </div>
+        <% } %>
+      </form>
+    </div>
+
+    <!-- Active Order Status Card -->
+    <% if (order) { %>
+    <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-2xs">
+      
+      <!-- Top Order Status Banner -->
+      <div class="bg-[#f3efe3] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-200/60">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-heading font-bold text-lg sm:text-xl text-[#0d2a1c]">Order <%= order.orderNumber %></span>
+            <span class="bg-[#123524] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              <%= order.status %>
+            </span>
+          </div>
+          <p class="text-xs text-gray-600 mt-1">Carrier: <strong class="text-gray-800"><%= order.carrier %></strong> &bull; Tracking ID: <span class="font-mono text-gray-800"><%= order.trackingCode %></span></p>
+        </div>
+
+        <div class="sm:text-right">
+          <span class="text-xs text-gray-500 block">Estimated Arrival</span>
+          <span class="font-heading font-bold text-sm sm:text-base text-emerald-800"><%= order.estimatedDelivery %></span>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-8 space-y-8">
+        
+        <!-- 4-Stage Stepper Progress Bar -->
+        <div>
+          <div class="grid grid-cols-4 gap-2 text-center relative">
+            <!-- Connecting Line -->
+            <div class="absolute top-4 left-1/8 right-1/8 h-1 bg-gray-200 -z-0">
+              <div class="h-full bg-[#123524] transition-all duration-500" style="width: 75%;"></div>
+            </div>
+
+            <!-- Step 1: Confirmed -->
+            <div class="flex flex-col items-center z-10">
+              <div class="w-9 h-9 rounded-full bg-[#123524] text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span class="text-xs font-semibold text-gray-800 mt-2">Ordered</span>
+            </div>
+
+            <!-- Step 2: Processing -->
+            <div class="flex flex-col items-center z-10">
+              <div class="w-9 h-9 rounded-full bg-[#123524] text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span class="text-xs font-semibold text-gray-800 mt-2">Processed</span>
+            </div>
+
+            <!-- Step 3: Shipped (Active) -->
+            <div class="flex flex-col items-center z-10">
+              <div class="w-9 h-9 rounded-full bg-[#3e8a5f] text-white flex items-center justify-center text-xs font-bold ring-4 ring-[#3e8a5f]/20 animate-pulse shadow-xs">
+                <i class="fa-solid fa-truck-fast"></i>
+              </div>
+              <span class="text-xs font-bold text-[#123524] mt-2">In Transit</span>
+            </div>
+
+            <!-- Step 4: Delivered -->
+            <div class="flex flex-col items-center z-10">
+              <div class="w-9 h-9 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-xs font-bold">
+                <i class="fa-solid fa-house"></i>
+              </div>
+              <span class="text-xs font-medium text-gray-400 mt-2">Delivered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items & Shipping Summary Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-gray-100">
+          
+          <!-- Items List -->
+          <div>
+            <h3 class="font-heading font-bold text-sm text-[#0d2a1c] mb-3">Package Items</h3>
+            <div class="space-y-3">
+              <% (order.items || []).forEach(function(item) { %>
+              <div class="flex items-center gap-3 p-3 bg-gray-50/70 rounded-2xl border border-gray-100">
+                <img src="<%= item.image %>" alt="<%= item.name %>" class="w-12 h-12 object-contain bg-white rounded-xl p-1 shrink-0 border border-gray-100">
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-xs font-semibold text-gray-800 truncate"><%= item.name %></h4>
+                  <p class="text-[11px] text-gray-500 mt-0.5">Qty: <%= item.qty %> &bull; $<%= item.price.toFixed(2) %></p>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+
+          <!-- Shipping Destination -->
+          <div>
+            <h3 class="font-heading font-bold text-sm text-[#0d2a1c] mb-3">Delivery Address</h3>
+            <div class="bg-gray-50/70 rounded-2xl p-4 border border-gray-100 text-xs space-y-1 text-gray-700">
+              <div class="font-semibold text-gray-900">Destination:</div>
+              <p class="leading-relaxed"><%= order.shippingAddress %></p>
+              <div class="pt-2 text-[11px] text-emerald-700 flex items-center gap-1.5 font-medium">
+                <i class="fa-solid fa-circle-check"></i> Standard Signature Not Required
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+    <% } %>
+
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

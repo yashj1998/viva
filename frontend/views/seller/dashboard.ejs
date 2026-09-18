@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Seller Dashboard — ViVA' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Notifications -->
+      <% if (message) { %>
+        <div class="p-3.5 sm:p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900 font-bold">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Store Header Banner -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-heading font-bold text-lg sm:text-xl text-[#123524]">
+              <%= currentSeller.storeName || 'Apex Audio & Living Studio' %>
+            </h1>
+            <span class="inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <i class="fa-solid fa-certificate text-[9px] text-amber-700"></i>
+              <span>Verified Merchant</span>
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            Real-time merchant operations, catalog inventory control, and live order fulfillment tracking.
+          </p>
+        </div>
+
+        <!-- Range Pills & Add Action -->
+        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <div class="flex items-center bg-gray-100 p-1 rounded-xl text-xs font-semibold overflow-x-auto max-w-full">
+            <a href="/seller/dashboard?range=7d" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors <%= currentRange === '7d' ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              7 Days
+            </a>
+            <a href="/seller/dashboard?range=30d" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors <%= currentRange === '30d' ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              30 Days
+            </a>
+            <a href="/seller/dashboard?range=month" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors <%= currentRange === 'month' ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              Month
+            </a>
+            <a href="/seller/dashboard?range=all" class="px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors <%= currentRange === 'all' ? 'bg-white text-[#123524] shadow-xs' : 'text-gray-500 hover:text-gray-900' %>">
+              All Time
+            </a>
+          </div>
+
+          <a href="/seller/products" class="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-[#123524] hover:bg-[#1a4b33] text-white text-xs font-bold transition-colors shadow-xs">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Product
+          </a>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Grid (6 cards) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        <!-- Card 1: Gross Sales -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Gross Sales</span>
+            <div class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-dollar-sign"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-lg sm:text-xl text-[#123524] truncate">$<%= stats.totalRevenue %></div>
+          <p class="text-[10px] text-emerald-600 font-semibold truncate"><%= stats.unitsSold %> units sold</p>
+        </div>
+
+        <!-- Card 2: Total Orders -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Total Orders</span>
+            <div class="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-lg sm:text-xl text-blue-900 truncate"><%= stats.totalOrders %></div>
+          <p class="text-[10px] text-gray-400 truncate">Store orders</p>
+        </div>
+
+        <!-- Card 3: Active Products -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Catalog Items</span>
+            <div class="w-6 h-6 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-lg sm:text-xl text-purple-900 truncate"><%= stats.activeProducts %></div>
+          <p class="text-[10px] text-gray-400 truncate">of <%= stats.totalProducts %> total</p>
+        </div>
+
+        <!-- Card 4: Store Customers -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div class="flex items-center justify-between text-gray-400">
+            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Buyers</span>
+            <div class="w-6 h-6 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-lg sm:text-xl text-teal-900 truncate"><%= stats.totalCustomers %></div>
+          <p class="text-[10px] text-gray-400 truncate">Unique buyers</p>
+        </div>
+
+        <!-- Card 5: Pending Fulfillment -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div class="flex items-center justify-between text-amber-600">
+            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">To Fulfill</span>
+            <div class="w-6 h-6 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-lg sm:text-xl text-amber-700 truncate"><%= stats.pendingCount %></div>
+          <p class="text-[10px] text-amber-700 font-semibold truncate">Dispatch needed</p>
+        </div>
+
+        <!-- Card 6: Low Stock Alerts -->
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200/80 p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div class="flex items-center justify-between text-rose-600">
+            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">Stock Alerts</span>
+            <div class="w-6 h-6 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center text-xs">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-lg sm:text-xl text-rose-700 truncate"><%= stats.lowStockCount %></div>
+          <p class="text-[10px] text-rose-700 font-semibold truncate">Low units</p>
+        </div>
+      </div>
+
+      <!-- Charts Section: Sales Trend & Category Distribution -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Revenue Trend Line Chart (2 Cols) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 p-4 sm:p-6 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-3 gap-2">
+            <div>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Store Revenue &amp; Orders Trend</h3>
+              <p class="text-xs text-gray-400">Daily sales performance for <%= currentSeller.storeName %></p>
+            </div>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full self-start sm:self-auto">
+              Live Mongo Aggregation
+            </span>
+          </div>
+          <div class="relative h-56 sm:h-64">
+            <canvas id="sellerSalesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Category Distribution Doughnut Chart (1 Col) -->
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 p-4 sm:p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3">
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Catalog Categories</h3>
+            <p class="text-xs text-gray-400">Inventory allocation by category</p>
+          </div>
+          <div class="relative h-56 sm:h-64 flex items-center justify-center">
+            <canvas id="sellerCategoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Column Operations Layout: Recent Orders & Top Selling / Low Stock -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Recent Store Orders (7 Cols) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 p-4 sm:p-6 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Recent Store Orders</h3>
+              <p class="text-xs text-gray-400">Orders containing products supplied by your store</p>
+            </div>
+            <a href="/seller/orders" class="text-xs font-bold text-emerald-700 hover:underline">
+              View All &rarr;
+            </a>
+          </div>
+
+          <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table class="w-full text-left text-xs min-w-[560px]">
+              <thead>
+                <tr class="text-gray-400 uppercase tracking-wider text-[10px] border-b border-gray-100 bg-gray-50/60">
+                  <th class="py-2.5 px-3">Order #</th>
+                  <th class="py-2.5 px-3">Customer</th>
+                  <th class="py-2.5 px-3">Items</th>
+                  <th class="py-2.5 px-3">Subtotal</th>
+                  <th class="py-2.5 px-3">Status</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% if (recentOrders && recentOrders.length > 0) { %>
+                  <% recentOrders.forEach(order => { %>
+                    <tr class="hover:bg-gray-50/60 transition-colors">
+                      <td class="py-3 px-3 font-mono font-bold text-[#123524] whitespace-nowrap">
+                        #<%= order.orderNumber %>
+                      </td>
+                      <td class="py-3 px-3">
+                        <div class="font-bold text-gray-900 truncate max-w-[120px]"><%= (order.customer && order.customer.name) || 'Customer' %></div>
+                        <div class="text-[10px] text-gray-400 truncate max-w-[120px]"><%= (order.customer && order.customer.city) || 'US' %></div>
+                      </td>
+                      <td class="py-3 px-3 whitespace-nowrap">
+                        <span class="font-semibold text-gray-700"><%= order.sellerItems ? order.sellerItems.length : 0 %> items</span>
+                      </td>
+                      <td class="py-3 px-3 font-bold text-[#123524] whitespace-nowrap">
+                        $<%= (order.sellerSubtotal || 0).toFixed(2) %>
+                      </td>
+                      <td class="py-3 px-3 whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold <%= order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : (order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : (order.status === 'Cancelled' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800')) %>">
+                          <%= order.status %>
+                        </span>
+                      </td>
+                      <td class="py-3 px-3 text-right whitespace-nowrap">
+                        <a href="/seller/orders?search=<%= order.orderNumber %>" class="px-2.5 py-1 bg-[#123524] hover:bg-[#1a4b33] text-white rounded-lg text-xs font-bold transition-colors">
+                          Fulfill
+                        </a>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="6" class="py-8 text-center text-gray-400">
+                      No recent orders for your store yet.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Top Products & Low Stock Alerts (5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <!-- Top Selling Products -->
+          <div class="bg-white rounded-3xl border border-gray-200/80 p-6 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Top Selling Products</h3>
+              <a href="/seller/products" class="text-xs font-bold text-emerald-700 hover:underline">Catalog &rarr;</a>
+            </div>
+
+            <div class="space-y-2.5">
+              <% if (topProducts && topProducts.length > 0) { %>
+                <% topProducts.forEach(prod => { %>
+                  <div class="flex items-center justify-between gap-3 text-xs p-2 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="w-9 h-9 bg-gray-50 rounded-lg p-1 border border-gray-100 flex items-center justify-center shrink-0">
+                        <img src="<%= prod.image %>" alt="<%= prod.name %>" class="max-h-full max-w-full object-contain">
+                      </div>
+                      <div class="min-w-0">
+                        <div class="font-bold text-gray-900 truncate"><%= prod.name %></div>
+                        <div class="text-[10px] text-gray-400"><%= prod.units %> units sold</div>
+                      </div>
+                    </div>
+                    <div class="font-bold text-[#123524] shrink-0">
+                      $<%= prod.revenue.toFixed(2) %>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <p class="text-xs text-gray-400 text-center py-4">No top product sales recorded yet.</p>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Low Stock Warnings -->
+          <div class="bg-white rounded-3xl border border-gray-200/80 p-6 shadow-xs space-y-3">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-xs"></i>
+                <h3 class="font-heading font-bold text-sm text-[#123524]">Low Stock Inventory</h3>
+              </div>
+              <a href="/seller/inventory" class="text-xs font-bold text-amber-700 hover:underline">Manage &rarr;</a>
+            </div>
+
+            <div class="space-y-2">
+              <% if (lowStockProducts && lowStockProducts.length > 0) { %>
+                <% lowStockProducts.forEach(prod => { %>
+                  <div class="flex items-center justify-between p-2 rounded-xl bg-amber-50/50 border border-amber-200/60 text-xs">
+                    <div class="min-w-0">
+                      <div class="font-bold text-gray-900 truncate"><%= prod.name %></div>
+                      <div class="text-[10px] text-gray-500 font-mono">SKU: <%= prod.sku || 'N/A' %></div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold <%= prod.stockQuantity <= 0 ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800' %>">
+                        <%= prod.stockQuantity %> left
+                      </span>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <p class="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-xl font-medium text-center">
+                  <i class="fa-solid fa-circle-check mr-1"></i> All stock levels are healthy!
+                </p>
+              <% } %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Chart.js Scripts -->
+  <script>
+    const chartLabels = <%- chartLabels %>;
+    const chartRevenues = <%- chartRevenues %>;
+    const chartOrders = <%- chartOrders %>;
+
+    // Sales Trend Chart
+    const salesCtx = document.getElementById('sellerSalesChart');
+    if (salesCtx) {
+      new Chart(salesCtx, {
+        type: 'line',
+        data: {
+          labels: chartLabels,
+          datasets: [
+            {
+              label: 'Revenue ($)',
+              data: chartRevenues,
+              borderColor: '#123524',
+              backgroundColor: 'rgba(18, 53, 36, 0.08)',
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.35,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Orders',
+              data: chartOrders,
+              borderColor: '#f59e0b',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              tension: 0.3,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Inter' } } }
+          },
+          scales: {
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              grid: { color: '#f3f4f6' },
+              ticks: { callback: v => '$' + v, font: { size: 10 } }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: { stepSize: 1, font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    // Category Chart
+    const catLabels = <%- categoryLabels %>;
+    const catCounts = <%- categoryCounts %>;
+    const catCtx = document.getElementById('sellerCategoryChart');
+    if (catCtx) {
+      new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+          labels: catLabels.length ? catLabels : ['General'],
+          datasets: [{
+            data: catCounts.length ? catCounts : [1],
+            backgroundColor: ['#123524', '#2c6b48', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10 } } }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!-- Single Product Card Component -->
+<div class="product-card bg-white rounded-2xl border border-gray-100/80 p-3.5 sm:p-4 flex flex-col justify-between relative group h-full">
+  
+  <!-- Discount Badge -->
+  <% if (product.discountPercent) { %>
+  <div class="absolute top-3 left-3 z-10 bg-[#e77b74] text-white text-[11px] font-bold px-2 py-0.5 rounded-md shadow-2xs">
+    -<%= product.discountPercent %>%
+  </div>
+  <% } %>
+
+  <!-- Custom Deal Tag / Highlight Badge -->
+  <% if (product.badgeText) { %>
+  <div class="absolute top-3 right-3 z-10 bg-[#123524] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs">
+    <%= product.badgeText %>
+  </div>
+  <% } %>
+
+  <!-- Product Image -->
+  <a href="/product/<%= product.slug %>" class="relative w-full h-36 sm:h-44 flex items-center justify-center mb-3 bg-gray-50/50 rounded-xl overflow-hidden block">
+    <img 
+      src="<%= product.primaryImageUrl %>" 
+      alt="<%= product.name %>" 
+      class="max-h-32 sm:max-h-40 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+      loading="lazy"
+    >
+  </a>
+
+  <!-- Product Info -->
+  <div class="flex-1 flex flex-col justify-between">
+    <div>
+      <a href="/product/<%= product.slug %>" class="block group/link">
+        <h3 class="font-medium text-xs sm:text-sm text-[#16261d] line-clamp-2 leading-snug group-hover/link:text-[#123524] group-hover:text-[#123524] transition-colors">
+          <%= product.name %>
+        </h3>
+      </a>
+      
+      <!-- Ratings -->
+      <div class="flex items-center gap-1 mt-1.5 text-xs">
+        <div class="flex text-[#f0a83e] text-[10px]">
+          <% for(let i = 0; i < 5; i++) { %>
+            <i class="fa-solid fa-star"></i>
+          <% } %>
+        </div>
+        <span class="text-gray-400 text-[11px]">(<%= (product.ratingCount || 0).toLocaleString() %>)</span>
+      </div>
+    </div>
+
+    <!-- Pricing and Quick Add -->
+    <div class="flex items-center justify-between mt-3 pt-2">
+      <div class="flex items-baseline gap-1.5">
+        <span class="font-bold text-sm sm:text-base text-[#c8503f]">
+          $<%= product.salePrice.toFixed(2) %>
+        </span>
+        <% if (product.price > product.salePrice) { %>
+        <span class="text-xs text-[#9ca3af] line-through">
+          $<%= product.price.toFixed(2) %>
+        </span>
+        <% } %>
+      </div>
+
+      <!-- Quick Add-to-Cart Circle Button -->
+      <button 
+        type="button" 
+        data-id="<%= product._id || product.slug %>"
+        aria-label="Add <%= product.name %> to cart" 
+        class="btn-add-cart w-8 h-8 rounded-full bg-[#123524] hover:bg-[#17422e] text-white flex items-center justify-center transition-all duration-200 transform hover:scale-110 shadow-xs active:scale-95 focus:outline-none"
+      >
+        <i class="fa-solid fa-cart-shopping text-xs"></i>
+      </button>
+    </div>
+  </div>
+
+</div>

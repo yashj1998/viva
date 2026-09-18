@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Wishlist Header -->
+  <div class="bg-white border-b border-gray-100 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div>
+        <h1 class="font-heading font-bold text-2xl sm:text-3xl text-[#0d2a1c] flex items-center gap-2">
+          <span>My Saved Wishlist</span>
+          <i class="fa-solid fa-heart text-[#e8756a] text-xl"></i>
+        </h1>
+        <p class="text-xs text-gray-500 mt-1">Keep track of your favorite picks and transfer them to your cart anytime.</p>
+      </div>
+      <a href="/shop" class="text-xs sm:text-sm font-semibold text-[#123524] hover:underline">
+        Continue Browsing &rarr;
+      </a>
+    </div>
+  </div>
+
+  <!-- Wishlist Items Grid -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <% if (wishlistItems && wishlistItems.length > 0) { %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <% wishlistItems.forEach(function(item) { %>
+      <div class="bg-white rounded-3xl border border-gray-100 p-5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative">
+        
+        <!-- Remove Button Top Right -->
+        <form action="/wishlist/update" method="POST" class="absolute top-4 right-4 z-10">
+          <input type="hidden" name="id" value="<%= item.id %>">
+          <input type="hidden" name="action" value="remove">
+          <button type="submit" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-rose-50 text-gray-400 hover:text-rose-600 flex items-center justify-center transition-colors shadow-2xs" title="Remove from wishlist">
+            <i class="fa-solid fa-xmark text-xs"></i>
+          </button>
+        </form>
+
+        <!-- Product Image -->
+        <div class="h-48 bg-gray-50/70 rounded-2xl p-4 flex items-center justify-center mb-4">
+          <img src="<%= item.image %>" alt="<%= item.name %>" class="max-h-36 max-w-full object-contain group-hover:scale-105 transition-transform">
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <i class="fa-solid fa-circle text-[6px]"></i> In Stock
+            </span>
+          </div>
+
+          <h3 class="font-heading font-semibold text-sm text-[#16261d] line-clamp-1">
+            <%= item.name %>
+          </h3>
+
+          <div class="flex items-baseline gap-2">
+            <span class="font-bold text-base text-[#c8503f]">$<%= item.price.toFixed(2) %></span>
+            <% if (item.originalPrice) { %>
+            <span class="text-xs text-gray-400 line-through">$<%= item.originalPrice.toFixed(2) %></span>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Move to Cart Action -->
+        <div class="pt-4 mt-4 border-t border-gray-50">
+          <form action="/wishlist/update" method="POST">
+            <input type="hidden" name="id" value="<%= item.id %>">
+            <input type="hidden" name="action" value="move-to-cart">
+            <button type="submit" class="w-full bg-[#123524] hover:bg-[#17422e] text-white text-xs font-semibold py-2.5 px-4 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs">
+              <i class="fa-solid fa-cart-plus text-xs"></i>
+              <span>Move to Cart</span>
+            </button>
+          </form>
+        </div>
+
+      </div>
+      <% }); %>
+    </div>
+    <% } else { %>
+    <!-- Empty Wishlist State -->
+    <div class="bg-white rounded-3xl border border-gray-100 p-12 text-center max-w-lg mx-auto space-y-4 shadow-2xs">
+      <div class="w-16 h-16 rounded-full bg-rose-50 text-[#e8756a] flex items-center justify-center mx-auto text-2xl">
+        <i class="fa-regular fa-heart"></i>
+      </div>
+      <h2 class="font-heading font-bold text-xl text-[#0d2a1c]">Your Wishlist is Empty</h2>
+      <p class="text-xs text-gray-500 leading-relaxed">Save items you love by tapping the heart icon on any product, and they'll be safely waiting here for you.</p>
+      <a href="/shop" class="inline-block bg-[#123524] text-white text-xs font-semibold px-7 py-3 rounded-full hover:bg-[#17422e] transition-colors shadow-xs">
+        Explore Catalog &rarr;
+      </a>
+    </div>
+    <% } %>
+
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

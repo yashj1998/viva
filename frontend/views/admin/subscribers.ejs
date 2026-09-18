@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Newsletter Subscribers — ViVA Admin' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+  
+  <%- include('sidebar') %>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Notifications -->
+      <% if (typeof message !== 'undefined' && message) { %>
+        <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Top Overview Card -->
+      <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-heading font-bold text-base text-[#123524] flex items-center gap-2">
+              <i class="fa-solid fa-envelope-open-text text-emerald-700"></i>
+              <span>Email Marketing &amp; Newsletter Leads</span>
+            </h2>
+            <p class="text-xs text-gray-500 mt-0.5">Subscribers acquired organically through the storefront newsletter section and checkout opt-ins.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold bg-[#eef1e6] text-[#123524] px-3.5 py-1.5 rounded-full border border-emerald-200">
+              Total Subscribers: <%= (subscribers || []).length %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscribers Data Table -->
+      <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+          <h2 class="font-heading font-bold text-sm text-[#123524]">Subscribed Audience</h2>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="text-gray-400 uppercase tracking-wider text-[10px] border-b border-gray-100 bg-gray-50/70">
+                <th class="py-3 px-4">Subscriber Email</th>
+                <th class="py-3 px-4">Acquisition Source</th>
+                <th class="py-3 px-4">Subscription Date</th>
+                <th class="py-3 px-4">Marketing Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% (subscribers || []).forEach(function(sub) { %>
+              <tr class="hover:bg-gray-50/70 transition-colors">
+                <td class="py-4 px-4 font-bold text-gray-900">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-[11px]">
+                      <%= sub.email.charAt(0).toUpperCase() %>
+                    </div>
+                    <span><%= sub.email %></span>
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[11px] font-mono font-medium">
+                    <%= sub.source || 'homepage-footer' %>
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-gray-500 text-[11px]">
+                  <%= sub.createdAt ? new Date(sub.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent' %>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-full text-[10px] font-bold border border-emerald-200 flex items-center gap-1 w-fit">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Subscribed (Active)
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-right space-x-1 whitespace-nowrap">
+                  <a href="mailto:<%= sub.email %>" class="text-[#123524] hover:underline font-bold text-xs inline-flex items-center gap-1 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200">
+                    <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    <span>Contact</span>
+                  </a>
+                  <form action="/admin/subscribers/delete/<%= sub._id || sub.email %>" method="POST" onsubmit="return confirm('Remove this subscriber from mailing list?')" class="inline">
+                    <button type="submit" class="p-1 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors" title="Remove Subscriber">
+                      <i class="fa-regular fa-trash-can text-xs"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              <% }); %>
+              <% if (!subscribers || subscribers.length === 0) { %>
+              <tr>
+                <td colspan="5" class="text-center py-8 text-gray-400">
+                  No subscribers recorded yet.
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

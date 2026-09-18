@@ -1,0 +1,151 @@
+/* ==========================================================================
+   ViVA (Live Better) — Design System Stylesheet
+   Direction: Light Theme Default with Rich Modern Aesthetics
+   ========================================================================== */
+
+:root {
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Brand Palette */
+  --color-green-950: #0d2a1c;
+  --color-green-900: #123524;
+  --color-green-800: #17422e;
+  --color-green-600: #2c6b48;
+  --color-green-500: #3e8a5f;
+  --color-green-400: #347551;
+
+  /* Backgrounds & Tints */
+  --color-cream: #f3efe3;
+  --color-sage: #eef1e6;
+  --color-peach: #f7ece2;
+  --color-ice-blue: #e6edf5;
+  --color-rose: #fce7e3;
+  --color-amber: #fef3c7;
+
+  /* Accents */
+  --color-coral: #e8756a;
+  --color-pink-badge: #e77b74;
+  --color-sale: #c8503f;
+  --color-strike: #9ca3af;
+  --color-star: #f0a83e;
+  --color-verified: #16a34a;
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: #16261d;
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-heading);
+}
+
+/* Hide scrollbars for horizontal nav strips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Card hover transitions */
+.product-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -6px rgba(18, 53, 36, 0.08), 0 4px 12px -2px rgba(18, 53, 36, 0.03);
+}
+
+.promo-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.promo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* Swiper Customizations */
+.hero-swiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background-color: rgba(18, 53, 36, 0.3);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+.hero-swiper .swiper-pagination-bullet-active {
+  width: 24px;
+  border-radius: 4px;
+  background-color: #123524;
+}
+
+.swiper-button-viva {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #123524;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  z-index: 10;
+}
+.swiper-button-viva:hover {
+  background: #123524;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+.swiper-button-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Add-to-cart pulse animation */
+@keyframes badge-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.badge-pop {
+  animation: badge-pop 0.3s ease-in-out;
+}
+
+/* ==========================================================================
+   Mobile Phone App Experience & Floating Bottom Navigation
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Prevent floating bottom nav bar from obscuring footer or checkout CTA */
+  body {
+    padding-bottom: 5.5rem;
+  }
+}
+
+.mobile-nav-tab, #mobile-bottom-cart-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Glassmorphic backdrop blur support */
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+  #viva-mobile-bottom-nav .bg-white\/95 {
+    background-color: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+}

@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'User & Customer Management — ViVA Admin' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+  
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Feedback Message -->
+      <% if (message) { %>
+        <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Top Header & Primary Actions -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="font-heading font-bold text-xl text-[#123524]">User &amp; Customer Management</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Comprehensive multi-table administration for Storefront Customers and Administrative Staff (RBAC).</p>
+        </div>
+        
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <% if (subTab === 'customers') { %>
+            <a 
+              href="/admin/customers/export" 
+              class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors shadow-2xs"
+            >
+              <i class="fa-solid fa-file-csv text-emerald-700 text-sm"></i> Export CSV
+            </a>
+            <button 
+              onclick="document.getElementById('addCustomerModal').classList.remove('hidden')"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#123524] text-white text-xs font-bold hover:bg-[#1a4b33] transition-colors shadow-xs shrink-0 cursor-pointer"
+            >
+              <i class="fa-solid fa-user-plus text-[11px]"></i> Add Customer
+            </button>
+          <% } else if (subTab === 'sellers') { %>
+            <button 
+              onclick="document.getElementById('addSellerModal').classList.remove('hidden')"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#123524] text-white text-xs font-bold hover:bg-[#1a4b33] transition-colors shadow-xs shrink-0 cursor-pointer"
+            >
+              <i class="fa-solid fa-store text-[11px]"></i> Register New Seller
+            </button>
+          <% } else { %>
+            <button 
+              onclick="document.getElementById('addUserModal').classList.remove('hidden')"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#123524] text-white text-xs font-bold hover:bg-[#1a4b33] transition-colors shadow-xs shrink-0 cursor-pointer"
+            >
+              <i class="fa-solid fa-shield-halved text-[11px]"></i> Add Staff Member
+            </button>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Multi-Table Navigation Tabs -->
+      <div class="border-b border-gray-200 flex items-center gap-3">
+        <a 
+          href="/admin/users?tab=sellers" 
+          class="pb-3 px-1 text-xs font-bold flex items-center gap-2 border-b-2 transition-all <%= subTab === 'sellers' ? 'border-[#123524] text-[#123524]' : 'border-transparent text-gray-400 hover:text-gray-700' %>"
+        >
+          <i class="fa-solid fa-store text-sm text-amber-500"></i>
+          <span>Sellers &amp; Merchants DB</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold <%= subTab === 'sellers' ? 'bg-[#123524] text-white' : 'bg-gray-100 text-gray-600' %>">
+            <%= (typeof allSellers !== 'undefined' && allSellers) ? allSellers.length : (typeof sellers !== 'undefined' && sellers ? sellers.length : 0) %>
+          </span>
+        </a>
+
+        <a 
+          href="/admin/users?tab=customers" 
+          class="pb-3 px-1 text-xs font-bold flex items-center gap-2 border-b-2 transition-all <%= subTab === 'customers' ? 'border-[#123524] text-[#123524]' : 'border-transparent text-gray-400 hover:text-gray-700' %>"
+        >
+          <i class="fa-solid fa-users text-sm"></i>
+          <span>Storefront Customers</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold <%= subTab === 'customers' ? 'bg-[#123524] text-white' : 'bg-gray-100 text-gray-600' %>">
+            <%= allCustomers.length %>
+          </span>
+        </a>
+
+        <a 
+          href="/admin/users?tab=staff" 
+          class="pb-3 px-1 text-xs font-bold flex items-center gap-2 border-b-2 transition-all <%= subTab === 'staff' ? 'border-[#123524] text-[#123524]' : 'border-transparent text-gray-400 hover:text-gray-700' %>"
+        >
+          <i class="fa-solid fa-user-shield text-sm"></i>
+          <span>Staff &amp; Access Control (RBAC)</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold <%= subTab === 'staff' ? 'bg-[#123524] text-white' : 'bg-gray-100 text-gray-600' %>">
+            <%= allStaff.length %>
+          </span>
+        </a>
+      </div>
+
+      <!-- TAB 1: STOREFRONT CUSTOMERS TABLE -->
+      <% if (subTab === 'customers') { %>
+        
+        <!-- Customer Stats Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Customers</span>
+            <div class="font-heading font-bold text-2xl text-[#123524] mt-1"><%= customerStats.totalCustomers %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Registered store buyers</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Active Accounts</span>
+            <div class="font-heading font-bold text-2xl text-emerald-700 mt-1"><%= customerStats.activeCount %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Can login &amp; purchase</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">VIP / Wholesale</span>
+            <div class="font-heading font-bold text-2xl text-amber-700 mt-1"><%= customerStats.vipCount %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">High-value members</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Customer Orders</span>
+            <div class="font-heading font-bold text-2xl text-blue-700 mt-1"><%= customerStats.totalOrders %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">$<%= customerStats.totalRevenue.toLocaleString() %> total spent</p>
+          </div>
+        </div>
+
+        <!-- Search, Filter & Bulk Actions Bar -->
+        <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <form action="/admin/users" method="GET" class="flex flex-wrap items-center gap-3 flex-1">
+            <input type="hidden" name="tab" value="customers">
+            
+            <!-- Search -->
+            <div class="relative flex-1 min-w-[220px]">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+              <input 
+                type="text" 
+                name="q" 
+                value="<%= filters.q %>" 
+                placeholder="Search by name, email, phone..." 
+                class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-gray-50/50"
+              >
+            </div>
+
+            <!-- Status Filter -->
+            <select 
+              name="status" 
+              onchange="this.form.submit()" 
+              class="text-xs py-2 px-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-700"
+            >
+              <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+              <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active Only</option>
+              <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended Only</option>
+            </select>
+
+            <!-- Role / Tier Filter -->
+            <select 
+              name="role" 
+              onchange="this.form.submit()" 
+              class="text-xs py-2 px-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-700"
+            >
+              <option value="all" <%= filters.role === 'all' ? 'selected' : '' %>>All Roles</option>
+              <option value="customer" <%= filters.role === 'customer' ? 'selected' : '' %>>Customer</option>
+              <option value="vip" <%= filters.role === 'vip' ? 'selected' : '' %>>VIP Member</option>
+              <option value="wholesale" <%= filters.role === 'wholesale' ? 'selected' : '' %>>Wholesale</option>
+            </select>
+
+            <button type="submit" class="px-3.5 py-2 bg-[#123524] text-white text-xs font-bold rounded-xl hover:bg-[#1a4b33] transition-colors shadow-2xs">
+              Filter
+            </button>
+
+            <% if (filters.q || filters.status !== 'all' || filters.role !== 'all') { %>
+              <a href="/admin/users?tab=customers" class="text-xs font-semibold text-rose-600 hover:underline">
+                Clear Filters
+              </a>
+            <% } %>
+          </form>
+
+          <!-- Bulk Actions Selector (Enabled via JS checkboxes) -->
+          <div id="bulkActionsContainer" class="hidden items-center gap-2 bg-emerald-50 border border-emerald-200 p-1.5 rounded-xl">
+            <span class="text-[11px] font-bold text-[#123524] px-2"><span id="selectedCount">0</span> selected</span>
+            <button onclick="submitBulkAction('activate')" class="px-2.5 py-1 text-[11px] font-semibold bg-white text-emerald-800 rounded-lg hover:bg-emerald-100 border border-emerald-300">
+              <i class="fa-solid fa-check text-[10px]"></i> Activate
+            </button>
+            <button onclick="submitBulkAction('suspend')" class="px-2.5 py-1 text-[11px] font-semibold bg-white text-amber-800 rounded-lg hover:bg-amber-100 border border-amber-300">
+              <i class="fa-solid fa-ban text-[10px]"></i> Suspend
+            </button>
+            <button onclick="submitBulkAction('delete')" class="px-2.5 py-1 text-[11px] font-semibold bg-white text-rose-800 rounded-lg hover:bg-rose-100 border border-rose-300">
+              <i class="fa-regular fa-trash-can text-[10px]"></i> Delete
+            </button>
+          </div>
+        </div>
+
+        <!-- Customer DB Table -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-database text-emerald-700 text-sm"></i>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Storefront Customer Database</h3>
+            </div>
+            <span class="text-xs text-gray-400 font-medium">Showing <%= customers.length %> of <%= allCustomers.length %> customers</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-gray-50/70 border-b border-gray-200 text-gray-400 uppercase font-bold text-[10px] tracking-wider">
+                  <th class="py-3 px-4 w-8 text-center">
+                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                  </th>
+                  <th class="py-3 px-4">Customer</th>
+                  <th class="py-3 px-4">Phone / Contact</th>
+                  <th class="py-3 px-4">Role / Tier</th>
+                  <th class="py-3 px-4">Orders &amp; Spent</th>
+                  <th class="py-3 px-4">Addresses</th>
+                  <th class="py-3 px-4">Account Status</th>
+                  <th class="py-3 px-4">Registered</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% if (customers.length === 0) { %>
+                  <tr>
+                    <td colspan="9" class="py-8 text-center text-gray-400">
+                      <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2 text-gray-400 text-lg">
+                        <i class="fa-solid fa-user-slash"></i>
+                      </div>
+                      <p class="font-bold text-xs text-gray-600">No customers match your search criteria</p>
+                      <a href="/admin/users?tab=customers" class="text-emerald-700 font-bold hover:underline text-xs mt-1 inline-block">Clear all filters</a>
+                    </td>
+                  </tr>
+                <% } %>
+
+                <% customers.forEach(c => { %>
+                  <tr class="hover:bg-gray-50/60 transition-colors">
+                    
+                    <!-- Checkbox -->
+                    <td class="py-4 px-4 text-center">
+                      <input type="checkbox" name="customerSelect" value="<%= c._id %>" onchange="updateBulkUI()" class="customer-checkbox rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                    </td>
+
+                    <!-- Customer Info -->
+                    <td class="py-4 px-4">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-[#123524] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                          <%= c.name ? c.name.charAt(0).toUpperCase() : 'U' %>
+                        </div>
+                        <div class="min-w-0">
+                          <button onclick="viewCustomerDetails('<%= c._id %>')" class="font-bold text-gray-900 hover:text-[#123524] hover:underline text-left block truncate max-w-[150px]">
+                            <%= c.name %>
+                          </button>
+                          <span class="text-[11px] text-gray-400 block truncate max-w-[150px]"><%= c.email %></span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Phone -->
+                    <td class="py-4 px-4 text-gray-600">
+                      <div><%= c.phone || '—' %></div>
+                    </td>
+
+                    <!-- Role / Tier -->
+                    <td class="py-4 px-4">
+                      <% if (c.role === 'vip') { %>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                          <i class="fa-solid fa-crown text-[9px] text-amber-600"></i> VIP Member
+                        </span>
+                      <% } else if (c.role === 'wholesale') { %>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                          <i class="fa-solid fa-building text-[9px] text-blue-600"></i> Wholesale
+                        </span>
+                      <% } else { %>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-700">
+                          Customer
+                        </span>
+                      <% } %>
+                    </td>
+
+                    <!-- Orders & Spent -->
+                    <td class="py-4 px-4">
+                      <div class="font-bold text-gray-800"><%= c.orderCount || 0 %> <%= (c.orderCount === 1) ? 'Order' : 'Orders' %></div>
+                      <div class="text-[11px] text-emerald-700 font-medium">$<%= (c.totalSpent || 0).toFixed(2) %></div>
+                    </td>
+
+                    <!-- Addresses -->
+                    <td class="py-4 px-4 text-gray-600">
+                      <% if (c.addresses && c.addresses.length > 0) { %>
+                        <div class="font-medium text-gray-800"><%= c.addresses.length %> saved</div>
+                        <div class="text-[10px] text-gray-400 truncate max-w-[130px]"><%= c.addresses[0].city %>, <%= c.addresses[0].state || c.addresses[0].country %></div>
+                      <% } else { %>
+                        <span class="text-gray-400">None</span>
+                      <% } %>
+                    </td>
+
+                    <!-- Status Toggle -->
+                    <td class="py-4 px-4">
+                      <form action="/admin/customers/status/<%= c._id %>" method="POST" class="inline">
+                        <button 
+                          type="submit" 
+                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors <%= c.status === 'active' ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-rose-100 text-rose-800 hover:bg-rose-200' %> cursor-pointer"
+                          title="Click to toggle active/suspended status"
+                        >
+                          <span class="w-1.5 h-1.5 rounded-full <%= c.status === 'active' ? 'bg-emerald-600' : 'bg-rose-600' %>"></span>
+                          <span><%= c.status || 'active' %></span>
+                        </button>
+                      </form>
+                    </td>
+
+                    <!-- Registered Date -->
+                    <td class="py-4 px-4 text-gray-500">
+                      <div><%= c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'N/A' %></div>
+                      <div class="text-[10px] text-gray-400"><%= c.lastLogin ? 'Active ' + new Date(c.lastLogin).toLocaleDateString() : '' %></div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-4 px-4 text-right space-x-1">
+                      <!-- View Details -->
+                      <button 
+                        onclick="viewCustomerDetails('<%= c._id %>')" 
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors" 
+                        title="View Customer Dossier & Orders"
+                      >
+                        <i class="fa-regular fa-eye text-xs"></i>
+                      </button>
+
+                      <!-- Edit Profile -->
+                      <button 
+                        onclick="openEditCustomerModal('<%= c._id %>', '<%= c.name %>', '<%= c.email %>', '<%= c.phone || '' %>', '<%= c.role || 'customer' %>', '<%= c.status || 'active' %>')" 
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" 
+                        title="Edit Customer Profile"
+                      >
+                        <i class="fa-regular fa-pen-to-square text-xs"></i>
+                      </button>
+
+                      <!-- Reset Password -->
+                      <button 
+                        onclick="openResetPasswordModal('<%= c._id %>', '<%= c.name %>')" 
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors" 
+                        title="Reset Password"
+                      >
+                        <i class="fa-solid fa-key text-xs"></i>
+                      </button>
+
+                      <!-- Delete -->
+                      <form action="/admin/customers/delete/<%= c._id %>" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete customer: <%= c.name %>? This cannot be undone.')" class="inline">
+                        <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Delete Customer">
+                          <i class="fa-regular fa-trash-can text-xs"></i>
+                        </button>
+                      </form>
+                    </td>
+
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      <!-- TAB 2: SELLERS & MERCHANTS DB TABLE -->
+      <% } else if (subTab === 'sellers') { %>
+
+        <!-- Seller KPI Metric Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Merchants</span>
+            <div class="font-heading font-bold text-2xl text-[#123524] mt-1"><%= (typeof sellerStats !== 'undefined') ? sellerStats.totalSellers : 0 %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Registered seller stores</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Active Stores</span>
+            <div class="font-heading font-bold text-2xl text-emerald-700 mt-1"><%= (typeof sellerStats !== 'undefined') ? sellerStats.activeCount : 0 %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Live on consumer catalog</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Merchant Products</span>
+            <div class="font-heading font-bold text-2xl text-blue-700 mt-1"><%= (typeof sellerStats !== 'undefined') ? sellerStats.totalProducts : 0 %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Inventory across stores</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Total Gross Sales</span>
+            <div class="font-heading font-bold text-2xl text-amber-700 mt-1">$<%= (typeof sellerStats !== 'undefined') ? sellerStats.totalRevenue.toLocaleString() : '0.00' %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Merchant volume to date</p>
+          </div>
+        </div>
+
+        <!-- Sellers Search & Filter Toolbar -->
+        <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+          <form action="/admin/users" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <input type="hidden" name="tab" value="sellers">
+            
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+              <input 
+                type="text" 
+                name="q" 
+                value="<%= filters.q || '' %>" 
+                placeholder="Search by store name, merchant owner, email, or phone..." 
+                class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap text-xs">
+              <select name="status" onchange="this.form.submit()" class="px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none font-medium text-gray-700">
+                <option value="all">All Statuses</option>
+                <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active Stores</option>
+                <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended Stores</option>
+              </select>
+
+              <button type="submit" class="px-4 py-2 bg-[#123524] text-white font-bold rounded-xl hover:bg-[#1a4b33] transition-colors shadow-2xs">
+                Filter
+              </button>
+              <% if (filters.q || (filters.status && filters.status !== 'all')) { %>
+                <a href="/admin/users?tab=sellers" class="px-3 py-2 text-gray-500 hover:text-gray-800 font-semibold">Reset</a>
+              <% } %>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sellers DB Table -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-store text-emerald-700 text-sm"></i>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Merchant Stores Database</h3>
+            </div>
+            <span class="text-xs text-gray-400 font-medium"><%= (typeof sellers !== 'undefined' && sellers) ? sellers.length : 0 %> stores listed</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-gray-50/70 border-b border-gray-200 text-gray-400 uppercase font-bold text-[10px] tracking-wider">
+                  <th class="py-3 px-5">Store Identity</th>
+                  <th class="py-3 px-5">Owner / Contact</th>
+                  <th class="py-3 px-5">Products</th>
+                  <th class="py-3 px-5">Orders</th>
+                  <th class="py-3 px-5">Gross Sales</th>
+                  <th class="py-3 px-5">Status</th>
+                  <th class="py-3 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% if (typeof sellers !== 'undefined' && sellers && sellers.length > 0) { %>
+                  <% sellers.forEach(s => { %>
+                    <tr class="hover:bg-gray-50/70 transition-colors">
+                      <!-- Store Identity -->
+                      <td class="py-4 px-5">
+                        <div class="flex items-center gap-3">
+                          <div class="w-10 h-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                            <img src="<%= s.logoUrl || '/images/viva-logo.png' %>" alt="<%= s.storeName %>" class="max-h-full max-w-full object-contain" onerror="this.src='/images/viva-logo.png'">
+                          </div>
+                          <div>
+                            <div class="font-bold text-gray-900 flex items-center gap-1.5">
+                              <span><%= s.storeName || s.name %></span>
+                              <i class="fa-solid fa-circle-check text-emerald-600 text-[11px]" title="Verified Merchant"></i>
+                            </div>
+                            <span class="text-[10px] text-gray-400 font-mono">ID: <%= s._id %></span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Owner / Contact -->
+                      <td class="py-4 px-5">
+                        <div class="font-medium text-gray-800"><%= s.name %></div>
+                        <div class="text-[11px] text-gray-500 font-mono"><%= s.email %></div>
+                        <% if (s.businessPhone) { %>
+                          <div class="text-[10px] text-gray-400"><%= s.businessPhone %></div>
+                        <% } %>
+                      </td>
+
+                      <!-- Products Count -->
+                      <td class="py-4 px-5 whitespace-nowrap">
+                        <a href="/admin/products?sellerId=<%= s._id %>" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold hover:bg-emerald-100 transition-colors" title="View products by this seller">
+                          <i class="fa-solid fa-boxes-stacked text-[10px]"></i>
+                          <span><%= s.productCount || 0 %> items</span>
+                        </a>
+                      </td>
+
+                      <!-- Orders Count -->
+                      <td class="py-4 px-5 whitespace-nowrap">
+                        <a href="/admin/orders?sellerId=<%= s._id %>" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 font-bold hover:bg-blue-100 transition-colors" title="View orders fulfilled by this seller">
+                          <i class="fa-solid fa-receipt text-[10px]"></i>
+                          <span><%= s.orderCount || 0 %> orders</span>
+                        </a>
+                      </td>
+
+                      <!-- Gross Sales -->
+                      <td class="py-4 px-5 whitespace-nowrap font-bold text-[#123524] text-sm">
+                        $<%= (s.totalRevenue || 0).toFixed(2) %>
+                      </td>
+
+                      <!-- Status -->
+                      <td class="py-4 px-5 whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider <%= s.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">
+                          <span class="w-1.5 h-1.5 rounded-full <%= s.status === 'active' ? 'bg-emerald-600' : 'bg-rose-600' %>"></span>
+                          <span><%= s.status || 'active' %></span>
+                        </span>
+                      </td>
+
+                      <!-- Actions -->
+                      <td class="py-4 px-5 text-right whitespace-nowrap space-x-1.5">
+                        <!-- View Scoped Dashboard -->
+                        <a 
+                          href="/admin?sellerId=<%= s._id %>" 
+                          class="px-2.5 py-1.5 bg-[#123524] hover:bg-[#1a4b33] text-white rounded-lg text-xs font-bold transition-colors shadow-2xs inline-flex items-center gap-1"
+                          title="Open scoped merchant dashboard"
+                        >
+                          <i class="fa-solid fa-chart-pie text-[10px]"></i>
+                          <span>Dashboard</span>
+                        </a>
+
+                        <!-- Toggle Status -->
+                        <form action="/admin/sellers/status/<%= s._id %>" method="POST" class="inline">
+                          <button 
+                            type="submit" 
+                            class="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                            title="<%= s.status === 'active' ? 'Suspend Merchant' : 'Reactivate Merchant' %>"
+                          >
+                            <i class="fa-solid <%= s.status === 'active' ? 'fa-ban text-rose-500' : 'fa-circle-check text-emerald-500' %> text-xs"></i>
+                          </button>
+                        </form>
+
+                        <!-- Delete Seller -->
+                        <form action="/admin/sellers/delete/<%= s._id %>" method="POST" onsubmit="return confirm('Delete merchant <%= s.storeName %>? This action will revoke seller access.')" class="inline">
+                          <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Delete Seller">
+                            <i class="fa-regular fa-trash-can text-xs"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="7" class="py-12 text-center text-gray-400">
+                      <i class="fa-solid fa-store text-2xl mb-2 block text-gray-300"></i>
+                      No merchant stores registered or matching filter.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      <!-- TAB 3: STAFF & ACCESS CONTROL (RBAC) TABLE -->
+      <% } else { %>
+
+        <!-- Staff Stats Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Staff</span>
+            <div class="font-heading font-bold text-2xl text-[#123524] mt-1"><%= stats.totalUsers %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Authorized team members</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Super Admins</span>
+            <div class="font-heading font-bold text-2xl text-emerald-700 mt-1"><%= stats.adminCount %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Full root authority</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Store Managers</span>
+            <div class="font-heading font-bold text-2xl text-blue-700 mt-1"><%= stats.managerCount %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Catalog &amp; promotions</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-gray-200/80 shadow-xs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Support Specialists</span>
+            <div class="font-heading font-bold text-2xl text-amber-700 mt-1"><%= stats.supportCount %></div>
+            <p class="text-[10px] text-gray-500 mt-0.5">Orders &amp; inquiries</p>
+          </div>
+        </div>
+
+        <!-- Staff DB Table -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs">
+          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-emerald-700 text-sm"></i>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Authorized Administrative Team</h3>
+            </div>
+            <span class="text-xs text-gray-400 font-medium"><%= users.length %> active profiles</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-gray-50/70 border-b border-gray-200 text-gray-400 uppercase font-bold text-[10px] tracking-wider">
+                  <th class="py-3 px-5">Staff Member</th>
+                  <th class="py-3 px-5">Assigned Role</th>
+                  <th class="py-3 px-5">Account Status</th>
+                  <th class="py-3 px-5">Last Activity</th>
+                  <th class="py-3 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <% users.forEach(u => { %>
+                  <tr class="hover:bg-gray-50/60 transition-colors">
+                    <!-- User Info -->
+                    <td class="py-4 px-5">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-[#123524] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                          <%= u.name ? u.name.charAt(0).toUpperCase() : 'U' %>
+                        </div>
+                        <div>
+                          <div class="font-bold text-gray-900"><%= u.name %></div>
+                          <div class="text-[11px] text-gray-400"><%= u.email %></div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Role Selector Form -->
+                    <td class="py-4 px-5">
+                      <form action="/admin/users/role/<%= u._id %>" method="POST" class="inline-flex items-center gap-1.5">
+                        <select 
+                          name="role" 
+                          onchange="this.form.submit()" 
+                          class="text-xs font-semibold py-1 px-2.5 rounded-lg border border-gray-200 bg-white shadow-2xs cursor-pointer focus:ring-1 focus:ring-emerald-500 focus:outline-none <%= u.role === 'admin' ? 'text-emerald-800 bg-emerald-50/50' : (u.role === 'manager' ? 'text-blue-800 bg-blue-50/50' : 'text-amber-800 bg-amber-50/50') %>"
+                        >
+                          <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Super Admin (Full Root)</option>
+                          <option value="manager" <%= u.role === 'manager' ? 'selected' : '' %>>Store Manager</option>
+                          <option value="support" <%= u.role === 'support' ? 'selected' : '' %>>Support Specialist</option>
+                        </select>
+                      </form>
+                    </td>
+
+                    <!-- Status Toggle -->
+                    <td class="py-4 px-5">
+                      <form action="/admin/users/status/<%= u._id %>" method="POST" class="inline">
+                        <button 
+                          type="submit" 
+                          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors <%= u.status === 'active' ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-rose-100 text-rose-800 hover:bg-rose-200' %> cursor-pointer"
+                          title="Click to toggle active/suspended status"
+                        >
+                          <span class="w-1.5 h-1.5 rounded-full <%= u.status === 'active' ? 'bg-emerald-600' : 'bg-rose-600' %>"></span>
+                          <span><%= u.status || 'active' %></span>
+                        </button>
+                      </form>
+                    </td>
+
+                    <!-- Last Login -->
+                    <td class="py-4 px-5 text-gray-500">
+                      <div><%= u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never' %></div>
+                      <div class="text-[10px] text-gray-400"><%= u.lastLogin ? new Date(u.lastLogin).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' %></div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-4 px-5 text-right">
+                      <form action="/admin/users/delete/<%= u._id %>" method="POST" onsubmit="return confirm('Are you sure you want to revoke access and delete this staff user?')" class="inline">
+                        <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Delete User">
+                          <i class="fa-regular fa-trash-can text-xs"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Role Privileges Guide -->
+        <div class="bg-emerald-950 text-white rounded-2xl p-6 shadow-xs">
+          <h4 class="font-heading font-bold text-sm text-emerald-300 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-key text-xs"></i> Role-Based Permissions Reference
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+            <div class="bg-white/5 p-3.5 rounded-xl border border-white/10">
+              <span class="font-bold text-emerald-400 block mb-1">Super Admin</span>
+              <p class="text-[11px] text-gray-300">Unrestricted root access. Can modify system settings, manage customer and staff accounts, view audit logs, adjust tax &amp; shipping, and control all store features.</p>
+            </div>
+            <div class="bg-white/5 p-3.5 rounded-xl border border-white/10">
+              <span class="font-bold text-blue-400 block mb-1">Store Manager</span>
+              <p class="text-[11px] text-gray-300">Inventory &amp; Merchandising. Can create/edit products, manage categories, curate Top Picks deals, manage media assets, hero slides, and promo banners.</p>
+            </div>
+            <div class="bg-white/5 p-3.5 rounded-xl border border-white/10">
+              <span class="font-bold text-amber-400 block mb-1">Support Specialist</span>
+              <p class="text-[11px] text-gray-300">Fulfillment &amp; CRM. Can update order statuses, view customer order details, respond to customer inquiries, manage reviews, and review newsletter leads.</p>
+            </div>
+          </div>
+        </div>
+
+      <% } %>
+
+    </main>
+  </div>
+
+  <!-- Hidden Bulk Action Form -->
+  <form id="bulkActionForm" action="/admin/customers/bulk" method="POST" class="hidden">
+    <input type="hidden" name="bulkAction" id="hiddenBulkAction">
+    <input type="hidden" name="selectedIds" id="hiddenSelectedIds">
+  </form>
+
+  <!-- MODAL 1: ADD CUSTOMER MODAL -->
+  <div id="addCustomerModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h3 class="font-heading font-bold text-base text-[#123524]">Add New Customer</h3>
+        <button onclick="document.getElementById('addCustomerModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+      </div>
+
+      <form action="/admin/customers/new" method="POST" class="space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Full Name *</label>
+            <input type="text" name="name" required placeholder="e.g. Liam Vance" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Customer Email *</label>
+            <input type="email" name="email" required placeholder="liam@example.com" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Phone Number</label>
+            <input type="text" name="phone" placeholder="+1 (555) 019-2834" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Initial Password *</label>
+            <input type="password" name="password" required placeholder="••••••••" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Customer Tier</label>
+            <select name="role" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="customer">Standard Customer</option>
+              <option value="vip">VIP Member</option>
+              <option value="wholesale">Wholesale Buyer</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Initial Status</label>
+            <select name="status" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="active">Active (Can log in)</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Optional Initial Address -->
+        <div class="pt-2 border-t border-gray-100 space-y-2">
+          <p class="font-bold text-gray-700 text-[11px]">Primary Shipping Address (Optional)</p>
+          <input type="text" name="street" placeholder="Street Address (e.g. 500 Market St)" class="w-full px-3 py-1.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <div class="grid grid-cols-3 gap-2">
+            <input type="text" name="city" placeholder="City" class="w-full px-3 py-1.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <input type="text" name="state" placeholder="State" class="w-full px-3 py-1.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <input type="text" name="zip" placeholder="Zip Code" class="w-full px-3 py-1.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('addCustomerModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-[#123524] text-white font-bold hover:bg-[#1a4b33] shadow-xs">Create Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: EDIT CUSTOMER MODAL -->
+  <div id="editCustomerModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h3 class="font-heading font-bold text-base text-[#123524]">Edit Customer Profile</h3>
+        <button onclick="document.getElementById('editCustomerModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+      </div>
+
+      <form id="editCustomerForm" action="" method="POST" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Customer Email (Read-only)</label>
+          <input type="email" id="editCustomerEmail" disabled class="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Full Name</label>
+          <input type="text" name="name" id="editCustomerName" required class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Phone Number</label>
+          <input type="text" name="phone" id="editCustomerPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Role / Tier</label>
+            <select name="role" id="editCustomerRole" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="customer">Customer</option>
+              <option value="vip">VIP Member</option>
+              <option value="wholesale">Wholesale</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Account Status</label>
+            <select name="status" id="editCustomerStatus" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('editCustomerModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-[#123524] text-white font-bold hover:bg-[#1a4b33] shadow-xs">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: RESET PASSWORD MODAL -->
+  <div id="resetPasswordModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h3 class="font-heading font-bold text-base text-[#123524]">Reset Customer Password</h3>
+        <button onclick="document.getElementById('resetPasswordModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+      </div>
+
+      <form id="resetPasswordForm" action="" method="POST" class="space-y-3 text-xs">
+        <p class="text-gray-600">Setting a new password for <span id="resetCustomerName" class="font-bold text-[#123524]"></span>.</p>
+        
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">New Password (min 6 characters)</label>
+          <input type="password" name="newPassword" required minlength="6" placeholder="••••••••" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('resetPasswordModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 shadow-xs">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: CUSTOMER DETAILS DOSSIER & ORDERS MODAL -->
+  <div id="customerDetailsModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div id="dossierAvatar" class="w-10 h-10 rounded-full bg-[#123524] text-white flex items-center justify-center font-bold text-sm shadow-xs"></div>
+          <div>
+            <h3 id="dossierName" class="font-heading font-bold text-base text-[#123524]">Customer Profile</h3>
+            <p id="dossierEmail" class="text-xs text-gray-500"></p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('customerDetailsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+          <span class="text-[10px] font-bold text-gray-400 uppercase">Tier / Role</span>
+          <div id="dossierRole" class="font-bold text-xs text-gray-800 capitalize mt-0.5"></div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+          <span class="text-[10px] font-bold text-gray-400 uppercase">Status</span>
+          <div id="dossierStatus" class="font-bold text-xs mt-0.5"></div>
+        </div>
+        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+          <span class="text-[10px] font-bold text-gray-400 uppercase">Phone</span>
+          <div id="dossierPhone" class="font-bold text-xs text-gray-800 mt-0.5"></div>
+        </div>
+      </div>
+
+      <!-- Saved Addresses -->
+      <div>
+        <h4 class="font-bold text-xs text-gray-700 mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-map-location-dot text-emerald-700"></i> Saved Shipping Addresses
+        </h4>
+        <div id="dossierAddresses" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <!-- Loaded via JS -->
+        </div>
+      </div>
+
+      <!-- Order History -->
+      <div>
+        <h4 class="font-bold text-xs text-gray-700 mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-receipt text-emerald-700"></i> Customer Order History
+        </h4>
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase font-bold">
+              <tr>
+                <th class="py-2.5 px-3">Order #</th>
+                <th class="py-2.5 px-3">Date</th>
+                <th class="py-2.5 px-3">Items</th>
+                <th class="py-2.5 px-3">Total</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 text-right">View</th>
+              </tr>
+            </thead>
+            <tbody id="dossierOrdersList" class="divide-y divide-gray-100">
+              <!-- Loaded via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-gray-100 text-right">
+        <button onclick="document.getElementById('customerDetailsModal').classList.add('hidden')" class="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-200">
+          Close Dossier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: ADD STAFF MODAL -->
+  <div id="addUserModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h3 class="font-heading font-bold text-base text-[#123524]">Add Staff Member (RBAC)</h3>
+        <button onclick="document.getElementById('addUserModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+      </div>
+
+      <form action="/admin/users/new" method="POST" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Full Name</label>
+          <input type="text" name="name" required placeholder="e.g. Jessica Taylor" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Staff Email</label>
+          <input type="email" name="email" required placeholder="jessica@viva.com" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Initial Password</label>
+          <input type="password" name="password" required placeholder="••••••••" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Security Role</label>
+          <select name="role" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="manager">Store Manager (Catalog, Media &amp; Banners)</option>
+            <option value="support">Support Specialist (Orders &amp; Inquiries)</option>
+            <option value="admin">Super Admin (Universal Root Access)</option>
+          </select>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('addUserModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-semibold">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-[#123524] text-white font-bold hover:bg-[#1a4b33] shadow-xs">Create Staff Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript Logic -->
+  <!-- MODAL: REGISTER NEW SELLER / MERCHANT MODAL -->
+  <div id="addSellerModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <h3 class="font-heading font-bold text-base text-[#123524]">Register New Merchant Store</h3>
+          <p class="text-xs text-gray-500">Create a dedicated seller merchant portal account</p>
+        </div>
+        <button onclick="document.getElementById('addSellerModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
+      </div>
+
+      <form action="/admin/sellers/new" method="POST" class="space-y-3.5 text-xs">
+        <input type="hidden" name="role" value="seller">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Store / Brand Name *</label>
+            <input type="text" name="storeName" required placeholder="e.g. Nordic Comfort Goods" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Owner / Contact Name *</label>
+            <input type="text" name="name" required placeholder="e.g. Alex Morgan" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Merchant Login Email *</label>
+            <input type="email" name="email" required placeholder="seller@nordic.com" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Initial Password *</label>
+            <input type="password" name="password" required placeholder="••••••••" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Business Phone</label>
+          <input type="text" name="phone" placeholder="+1 (555) 345-6789" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Store Tagline / Bio</label>
+          <textarea name="storeDescription" rows="2" placeholder="Brief overview of products and heritage..." class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('addSellerModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-bold">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 bg-[#123524] hover:bg-[#1a4b33] text-white font-bold rounded-xl transition-colors shadow-xs flex items-center gap-1.5">
+            <i class="fa-solid fa-store text-xs"></i>
+            <span>Register Merchant</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 1. Bulk Select & Checkbox Handler
+    function toggleSelectAll(master) {
+      const checkboxes = document.querySelectorAll('.customer-checkbox');
+      checkboxes.forEach(cb => cb.checked = master.checked);
+      updateBulkUI();
+    }
+
+    function updateBulkUI() {
+      const checkedBoxes = document.querySelectorAll('.customer-checkbox:checked');
+      const container = document.getElementById('bulkActionsContainer');
+      const countSpan = document.getElementById('selectedCount');
+      if (!container || !countSpan) return;
+
+      if (checkedBoxes.length > 0) {
+        container.classList.remove('hidden');
+        container.classList.add('flex');
+        countSpan.textContent = checkedBoxes.length;
+      } else {
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+      }
+    }
+
+    function submitBulkAction(action) {
+      const checkedBoxes = document.querySelectorAll('.customer-checkbox:checked');
+      if (checkedBoxes.length === 0) return alert('Please select at least one customer');
+
+      const ids = Array.from(checkedBoxes).map(cb => cb.value);
+      if (action === 'delete') {
+        if (!confirm(`Are you sure you want to delete ${ids.length} customers? This cannot be undone.`)) return;
+      }
+
+      document.getElementById('hiddenBulkAction').value = action;
+      document.getElementById('hiddenSelectedIds').value = ids.join(',');
+      document.getElementById('bulkActionForm').submit();
+    }
+
+    // 2. Open Edit Customer Modal
+    function openEditCustomerModal(id, name, email, phone, role, status) {
+      document.getElementById('editCustomerForm').action = '/admin/customers/edit/' + id;
+      document.getElementById('editCustomerEmail').value = email;
+      document.getElementById('editCustomerName').value = name;
+      document.getElementById('editCustomerPhone').value = phone;
+      document.getElementById('editCustomerRole').value = role;
+      document.getElementById('editCustomerStatus').value = status;
+      document.getElementById('editCustomerModal').classList.remove('hidden');
+    }
+
+    // 3. Open Reset Password Modal
+    function openResetPasswordModal(id, name) {
+      document.getElementById('resetPasswordForm').action = '/admin/customers/password/' + id;
+      document.getElementById('resetCustomerName').textContent = name;
+      document.getElementById('resetPasswordModal').classList.remove('hidden');
+    }
+
+    // 4. View Customer Details Dossier via AJAX
+    async function viewCustomerDetails(id) {
+      try {
+        const modal = document.getElementById('customerDetailsModal');
+        modal.classList.remove('hidden');
+
+        // Reset fields with loading placeholders
+        document.getElementById('dossierAvatar').textContent = '...';
+        document.getElementById('dossierName').textContent = 'Loading...';
+        document.getElementById('dossierEmail').textContent = 'Fetching customer dossier...';
+        document.getElementById('dossierRole').textContent = '—';
+        document.getElementById('dossierStatus').textContent = '—';
+        document.getElementById('dossierPhone').textContent = '—';
+        document.getElementById('dossierAddresses').innerHTML = '<div class="text-gray-400">Loading addresses...</div>';
+        document.getElementById('dossierOrdersList').innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-400">Loading order records...</td></tr>';
+
+        const res = await fetch('/admin/customers/details/' + id);
+        const data = await res.json();
+
+        if (!data.success || !data.customer) {
+          alert('Failed to load customer details');
+          modal.classList.add('hidden');
+          return;
+        }
+
+        const c = data.customer;
+        document.getElementById('dossierAvatar').textContent = c.name ? c.name.charAt(0).toUpperCase() : 'U';
+        document.getElementById('dossierName').textContent = c.name;
+        document.getElementById('dossierEmail').textContent = c.email;
+        document.getElementById('dossierRole').textContent = c.role;
+        document.getElementById('dossierStatus').innerHTML = `<span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase ${c.status === 'active' ? 'text-emerald-700' : 'text-rose-700'}">${c.status}</span>`;
+        document.getElementById('dossierPhone').textContent = c.phone || 'N/A';
+
+        // Render Addresses
+        const addrBox = document.getElementById('dossierAddresses');
+        if (c.addresses && c.addresses.length > 0) {
+          addrBox.innerHTML = c.addresses.map((a, i) => `
+            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+              <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Address #${i + 1}</span>
+              <div class="font-medium text-gray-800">${a.street || 'No street'}</div>
+              <div class="text-gray-500 text-[11px]">${a.city || ''}, ${a.state || ''} ${a.zip || ''}</div>
+              <div class="text-gray-400 text-[10px]">${a.country || ''}</div>
+            </div>
+          `).join('');
+        } else {
+          addrBox.innerHTML = '<div class="text-gray-400 py-1">No saved addresses on file.</div>';
+        }
+
+        // Render Orders
+        const ordersBox = document.getElementById('dossierOrdersList');
+        if (data.orders && data.orders.length > 0) {
+          ordersBox.innerHTML = data.orders.map(o => `
+            <tr class="hover:bg-gray-50/60">
+              <td class="py-2 px-3 font-bold text-gray-900">${o.orderNumber}</td>
+              <td class="py-2 px-3 text-gray-500">${new Date(o.createdAt).toLocaleDateString()}</td>
+              <td class="py-2 px-3 text-gray-600">${(o.items && o.items.length) || o.itemsCount || 0} items</td>
+              <td class="py-2 px-3 font-semibold text-gray-900">$${Number(o.total).toFixed(2)}</td>
+              <td class="py-2 px-3">
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                  o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' :
+                  o.status === 'Shipped' ? 'bg-blue-100 text-blue-800' :
+                  o.status === 'Processing' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'
+                }">${o.status}</span>
+              </td>
+              <td class="py-2 px-3 text-right">
+                <a href="/admin/orders" class="text-emerald-700 hover:underline font-bold text-[11px]">Manage</a>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          ordersBox.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-gray-400">No orders placed by this customer yet.</td></tr>';
+        }
+
+      } catch (err) {
+        console.error('Error loading dossier:', err);
+        alert('Error fetching customer details');
+      }
+    }
+
+    // 5. Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.fixed.inset-0').forEach(m => m.classList.add('hidden'));
+      }
+    });
+  </script>
+
+</body>
+</html>

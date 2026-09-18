@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Orders & Fulfillment — ViVA Seller Center' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Notifications -->
+      <% if (message) { %>
+        <div class="p-3.5 sm:p-4 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900 font-bold">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Top Header & KPI -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="font-heading font-bold text-lg sm:text-xl text-[#123524]">Store Orders &amp; Fulfillment</h1>
+          <p class="text-xs text-gray-500 mt-0.5">Manage customer orders containing items from <%= currentSeller.storeName %>.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-gray-500">Store Orders: <strong class="text-[#123524]"><%= stats.totalOrders %></strong></span>
+        </div>
+      </div>
+
+      <!-- Filter Pills (Scrollable on mobile) -->
+      <div class="flex items-center gap-1.5 flex-nowrap sm:flex-wrap overflow-x-auto pb-1 sm:pb-0 text-xs max-w-full">
+        <a href="/seller/orders?status=all" class="px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors <%= (!query.status || query.status === 'all') ? 'bg-[#123524] text-white shadow-xs' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' %>">
+          All Orders (<%= stats.totalOrders %>)
+        </a>
+        <a href="/seller/orders?status=Ordered" class="px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors <%= query.status === 'Ordered' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-50' %>">
+          Pending Action (<%= stats.pendingCount %>)
+        </a>
+        <a href="/seller/orders?status=Shipped" class="px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors <%= query.status === 'Shipped' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50' %>">
+          In Transit (<%= stats.shippedCount %>)
+        </a>
+        <a href="/seller/orders?status=Delivered" class="px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors <%= query.status === 'Delivered' ? 'bg-emerald-700 text-white shadow-xs' : 'bg-white text-emerald-800 border border-emerald-200 hover:bg-emerald-50' %>">
+          Delivered (<%= stats.deliveredCount %>)
+        </a>
+      </div>
+
+      <!-- Search & Filter Toolbar -->
+      <form action="/seller/orders" method="GET" class="bg-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
+        <input type="hidden" name="status" value="<%= query.status || 'all' %>">
+
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+          <input 
+            type="text" 
+            name="search" 
+            value="<%= query.search || '' %>" 
+            placeholder="Search order #, customer name, email, or tracking..." 
+            class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 sm:flex items-center gap-2">
+          <select name="paymentStatus" onchange="this.form.submit()" class="w-full sm:w-auto px-2.5 sm:px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none font-medium text-gray-700 text-xs">
+            <option value="all">All Payments</option>
+            <option value="Paid" <%= query.paymentStatus === 'Paid' ? 'selected' : '' %>>Paid</option>
+            <option value="Pending" <%= query.paymentStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+            <option value="Refunded" <%= query.paymentStatus === 'Refunded' ? 'selected' : '' %>>Refunded</option>
+          </select>
+
+          <select name="shippingStatus" onchange="this.form.submit()" class="w-full sm:w-auto px-2.5 sm:px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none font-medium text-gray-700 text-xs">
+            <option value="all">All Shipping</option>
+            <option value="Unfulfilled" <%= query.shippingStatus === 'Unfulfilled' ? 'selected' : '' %>>Unfulfilled</option>
+            <option value="In Transit" <%= query.shippingStatus === 'In Transit' ? 'selected' : '' %>>In Transit</option>
+            <option value="Delivered" <%= query.shippingStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+          </select>
+
+          <div class="col-span-2 sm:col-span-1 flex items-center gap-2">
+            <button type="submit" class="flex-1 sm:flex-initial px-4 py-2 bg-[#123524] text-white font-bold rounded-xl hover:bg-[#1a4b33] transition-colors text-center">
+              Filter
+            </button>
+            <% if (query.search || (query.paymentStatus && query.paymentStatus !== 'all') || (query.shippingStatus && query.shippingStatus !== 'all')) { %>
+              <a href="/seller/orders" class="px-2.5 py-2 text-gray-500 hover:text-gray-800 font-semibold">Reset</a>
+            <% } %>
+          </div>
+        </div>
+      </form>
+
+      <!-- Orders Table -->
+      <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 overflow-hidden shadow-xs">
+        <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <table class="w-full text-left text-xs min-w-[760px]">
+            <thead>
+              <tr class="text-gray-400 uppercase tracking-wider text-[10px] border-b border-gray-100 bg-gray-50/70">
+                <th class="py-3 px-4">Order Number</th>
+                <th class="py-3 px-4">Customer</th>
+                <th class="py-3 px-4">Store Items</th>
+                <th class="py-3 px-4">Store Subtotal</th>
+                <th class="py-3 px-4">Payment</th>
+                <th class="py-3 px-4">Carrier &amp; Tracking</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Fulfillment</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% if (orders && orders.length > 0) { %>
+                <% orders.forEach(order => { %>
+                  <tr class="hover:bg-gray-50/60 transition-colors">
+                    
+                    <!-- Order # -->
+                    <td class="py-4 px-4 font-mono font-bold text-[#123524] whitespace-nowrap">
+                      #<%= order.orderNumber %>
+                    </td>
+
+                    <!-- Customer Info -->
+                    <td class="py-4 px-4">
+                      <div class="font-bold text-gray-900"><%= (order.customer && order.customer.name) || 'Customer' %></div>
+                      <div class="text-[10px] text-gray-400"><%= (order.customer && order.customer.email) || 'N/A' %></div>
+                      <div class="text-[10px] text-gray-400"><%= (order.customer && order.customer.city) || 'US' %>, <%= (order.customer && order.customer.zip) || '' %></div>
+                    </td>
+
+                    <!-- Store Items -->
+                    <td class="py-4 px-4 max-w-xs">
+                      <% if (order.sellerItems && order.sellerItems.length > 0) { %>
+                        <div class="space-y-1">
+                          <% order.sellerItems.forEach(item => { %>
+                            <div class="flex items-center gap-2">
+                              <% if (item.image) { %>
+                                <img src="<%= item.image %>" alt="Product" class="w-7 h-7 object-contain rounded border border-gray-100 bg-white shrink-0">
+                              <% } %>
+                              <div class="min-w-0">
+                                <div class="font-medium text-gray-800 truncate max-w-[160px]"><%= item.name %></div>
+                                <div class="text-[10px] text-gray-400 font-mono">Qty: <%= item.quantity || 1 %> &bull; $<%= Number(item.price || 0).toFixed(2) %></div>
+                              </div>
+                            </div>
+                          <% }) %>
+                        </div>
+                      <% } else { %>
+                        <span class="text-gray-400">Order item line</span>
+                      <% } %>
+                    </td>
+
+                    <!-- Store Subtotal -->
+                    <td class="py-4 px-4 whitespace-nowrap font-bold text-[#123524] text-sm">
+                      $<%= (order.sellerSubtotal || 0).toFixed(2) %>
+                    </td>
+
+                    <!-- Payment Status -->
+                    <td class="py-4 px-4 whitespace-nowrap">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold <%= order.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                        <%= order.paymentStatus || 'Paid' %>
+                      </span>
+                    </td>
+
+                    <!-- Carrier & Tracking -->
+                    <td class="py-4 px-4 whitespace-nowrap">
+                      <div class="font-semibold text-gray-700 flex items-center gap-1">
+                        <i class="fa-solid fa-truck text-[9px] text-emerald-700"></i>
+                        <span><%= order.carrier || 'Standard Shipping' %></span>
+                      </div>
+                      <% if (order.trackingNumber) { %>
+                        <div class="text-[10px] font-mono text-gray-500 mt-0.5"><%= order.trackingNumber %></div>
+                      <% } else { %>
+                        <div class="text-[10px] text-amber-600 font-semibold mt-0.5">No tracking assigned</div>
+                      <% } %>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="py-4 px-4 whitespace-nowrap">
+                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider <%= order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : (order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : (order.status === 'Cancelled' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800')) %>">
+                        <%= order.status %>
+                      </span>
+                    </td>
+
+                    <!-- Action -->
+                    <td class="py-4 px-4 text-right whitespace-nowrap">
+                      <button 
+                        type="button" 
+                        onclick="openFulfillmentModal('<%= order.orderNumber %>', '<%= order.status %>', '<%= order.shippingStatus %>', '<%= order.carrier || '' %>', '<%= order.trackingNumber || '' %>')"
+                        class="px-3 py-1.5 bg-[#123524] hover:bg-[#1a4b33] text-white rounded-lg text-xs font-bold transition-colors shadow-2xs cursor-pointer"
+                      >
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="8" class="py-12 text-center text-gray-400">
+                    <i class="fa-solid fa-receipt text-3xl mb-2 block text-gray-300"></i>
+                    No orders found matching your search or filters.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+          <div class="p-3.5 sm:p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs bg-gray-50/50">
+            <span class="text-gray-500 font-medium text-center sm:text-left">
+              Page <%= pagination.page %> of <%= pagination.totalPages %> (<%= pagination.totalOrders %> orders)
+            </span>
+            <div class="flex items-center gap-1.5 flex-wrap justify-center">
+              <% if (pagination.hasPrevPage) { %>
+                <a href="/seller/orders?page=<%= pagination.page - 1 %>&status=<%= query.status || 'all' %>&search=<%= query.search || '' %>" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 font-bold text-gray-700">
+                  &larr; Prev
+                </a>
+              <% } %>
+              <% for(let p = 1; p <= pagination.totalPages; p++) { %>
+                <a href="/seller/orders?page=<%= p %>&status=<%= query.status || 'all' %>&search=<%= query.search || '' %>" class="px-2.5 sm:px-3 py-1.5 rounded-lg font-bold transition-colors <%= p === pagination.page ? 'bg-[#123524] text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50' %>">
+                  <%= p %>
+                </a>
+              <% } %>
+              <% if (pagination.hasNextPage) { %>
+                <a href="/seller/orders?page=<%= pagination.page + 1 %>&status=<%= query.status || 'all' %>&search=<%= query.search || '' %>" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 font-bold text-gray-700">
+                  Next &rarr;
+                </a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Fulfillment Update Modal -->
+  <div id="sellerFulfillModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <h3 class="font-heading font-bold text-base text-[#123524]">Update Order Fulfillment</h3>
+          <span class="text-xs font-mono text-gray-500" id="modalOrderNumber">#</span>
+        </div>
+        <button onclick="document.getElementById('sellerFulfillModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg p-1">&times;</button>
+      </div>
+
+      <form action="/seller/orders/status" method="POST" class="space-y-4 text-xs">
+        <input type="hidden" name="orderNumber" id="formOrderNumber">
+
+        <div class="space-y-1">
+          <label class="font-bold text-gray-700">Order Stage Status</label>
+          <select name="status" id="formStatus" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold">
+            <option value="Ordered">Ordered (New)</option>
+            <option value="Processing">Processing (Packing in Warehouse)</option>
+            <option value="Shipped">Shipped (Handed to Carrier)</option>
+            <option value="Delivered">Delivered (Completed)</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-gray-700">Shipping / Transit State</label>
+          <select name="shippingStatus" id="formShippingStatus" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold">
+            <option value="Unfulfilled">Unfulfilled</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-gray-700">Shipping Carrier</label>
+          <input type="text" name="carrier" id="formCarrier" placeholder="FedEx Express / UPS / USPS" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-gray-700">Carrier Tracking Number</label>
+          <input type="text" name="trackingNumber" id="formTrackingNumber" placeholder="e.g. TRK-99882241" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono">
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-gray-700">Fulfillment Note (Optional)</label>
+          <input type="text" name="note" placeholder="e.g. Dispatched from Austin Warehouse Dock B" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('sellerFulfillModal').classList.add('hidden')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-bold">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 bg-[#123524] hover:bg-[#1a4b33] text-white font-bold rounded-xl shadow-xs transition-colors">
+            Update Fulfillment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openFulfillmentModal(orderNum, status, shippingStatus, carrier, tracking) {
+      document.getElementById('modalOrderNumber').innerText = '#' + orderNum;
+      document.getElementById('formOrderNumber').value = orderNum;
+      document.getElementById('formStatus').value = status || 'Ordered';
+      document.getElementById('formShippingStatus').value = shippingStatus || 'Unfulfilled';
+      document.getElementById('formCarrier').value = carrier || '';
+      document.getElementById('formTrackingNumber').value = tracking || '';
+      document.getElementById('sellerFulfillModal').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

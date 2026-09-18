@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Cart Header -->
+  <div class="bg-white border-b border-gray-100 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div>
+        <h1 class="font-heading font-bold text-2xl sm:text-3xl text-[#0d2a1c]">Shopping Cart</h1>
+        <p class="text-xs text-gray-500 mt-1">Review your selected items and proceed to secure checkout.</p>
+      </div>
+      <a href="/shop" class="text-xs sm:text-sm font-semibold text-[#123524] hover:underline flex items-center gap-1">
+        <span>Continue Shopping</span>
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Cart Content -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <% if (cartItems && cartItems.length > 0) { %>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left: Line Items List -->
+      <div class="lg:col-span-8 space-y-4">
+        
+        <!-- Free Shipping Progress Banner -->
+        <div class="bg-[#eef1e6] rounded-2xl p-4 sm:p-5 border border-[#d8e0ce] space-y-2">
+          <div class="flex items-center justify-between text-xs font-semibold text-[#123524]">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-truck text-sm"></i>
+              <% if (progressPercent >= 100) { %>
+                🎉 You've unlocked FREE Standard Shipping!
+              <% } else { %>
+                Add $<%= (freeShippingThreshold - subtotal).toFixed(2) %> more to unlock FREE Shipping!
+              <% } %>
+            </span>
+            <span><%= progressPercent %>%</span>
+          </div>
+          <div class="w-full bg-white/70 h-2 rounded-full overflow-hidden">
+            <div class="bg-[#123524] h-full rounded-full transition-all duration-500" style="width: <%= progressPercent %>%;"></div>
+          </div>
+        </div>
+
+        <!-- Items Card -->
+        <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-2xs divide-y divide-gray-100">
+          <% cartItems.forEach(function(item) { %>
+          <div class="py-5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-4">
+              <div class="w-20 h-20 bg-gray-50 rounded-2xl p-2 flex items-center justify-center shrink-0 border border-gray-100">
+                <img src="<%= item.image %>" alt="<%= item.name %>" class="max-h-full max-w-full object-contain">
+              </div>
+
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block"><%= item.category || 'Essential' %></span>
+                <h3 class="font-heading font-semibold text-sm sm:text-base text-[#16261d]">
+                  <%= item.name %>
+                </h3>
+                <div class="flex items-baseline gap-2 mt-1">
+                  <span class="font-bold text-sm text-[#c8503f]">$<%= item.price.toFixed(2) %></span>
+                  <% if (item.originalPrice && item.originalPrice > item.price) { %>
+                  <span class="text-xs text-gray-400 line-through">$<%= item.originalPrice.toFixed(2) %></span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quantity Controls & Subtotal -->
+            <div class="flex items-center justify-between sm:justify-end gap-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50">
+              
+              <!-- Quantity Stepper -->
+              <div class="flex items-center border border-gray-200 rounded-full px-2 py-1 bg-gray-50">
+                <form action="/cart/update" method="POST" class="inline">
+                  <input type="hidden" name="id" value="<%= item.id %>">
+                  <input type="hidden" name="action" value="decrement">
+                  <button type="submit" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-[#123524] text-xs" aria-label="Decrease quantity">
+                    <i class="fa-solid fa-minus text-[10px]"></i>
+                  </button>
+                </form>
+
+                <span class="w-8 text-center text-xs font-bold text-[#16261d]">
+                  <%= item.quantity %>
+                </span>
+
+                <form action="/cart/update" method="POST" class="inline">
+                  <input type="hidden" name="id" value="<%= item.id %>">
+                  <input type="hidden" name="action" value="increment">
+                  <button type="submit" class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-[#123524] text-xs" aria-label="Increase quantity">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Item Total Price -->
+              <div class="font-heading font-bold text-sm sm:text-base text-[#0d2a1c] min-w-[70px] text-right">
+                $<%= (item.price * item.quantity).toFixed(2) %>
+              </div>
+
+              <!-- Remove Button -->
+              <form action="/cart/update" method="POST" class="inline">
+                <input type="hidden" name="id" value="<%= item.id %>">
+                <input type="hidden" name="action" value="remove">
+                <button type="submit" class="text-gray-400 hover:text-rose-600 transition-colors p-1" title="Remove item">
+                  <i class="fa-regular fa-trash-can text-sm"></i>
+                </button>
+              </form>
+
+            </div>
+
+          </div>
+          <% }); %>
+        </div>
+
+      </div>
+
+      <!-- Right: Order Summary -->
+      <div class="lg:col-span-4 space-y-6">
+        <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-7 shadow-2xs space-y-5 sticky top-24">
+          
+          <h2 class="font-heading font-bold text-lg text-[#0d2a1c] pb-3 border-b border-gray-100">
+            Order Summary
+          </h2>
+
+          <div class="space-y-3 text-xs text-gray-600">
+            <div class="flex justify-between">
+              <span>Items Subtotal</span>
+              <span class="font-semibold text-gray-900">$<%= subtotal %></span>
+            </div>
+
+            <div class="flex justify-between">
+              <span>Standard Shipping</span>
+              <span>
+                <% if (Number(shippingFee) === 0) { %>
+                  <strong class="text-emerald-700">FREE</strong>
+                <% } else { %>
+                  <span class="font-semibold text-gray-900">$<%= shippingFee %></span>
+                <% } %>
+              </span>
+            </div>
+
+            <div class="flex justify-between">
+              <span>Estimated Sales Tax</span>
+              <span class="font-semibold text-gray-900">$<%= tax %></span>
+            </div>
+          </div>
+
+          <!-- Promo Code Input -->
+          <div class="pt-3 border-t border-gray-100">
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Promo code (e.g. VIVA20)" 
+                class="w-full text-xs uppercase bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#123524]"
+              >
+              <button type="button" class="bg-gray-100 hover:bg-[#123524] hover:text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors shrink-0">
+                Apply
+              </button>
+            </div>
+          </div>
+
+          <!-- Grand Total -->
+          <div class="pt-3 border-t border-gray-100 flex items-baseline justify-between">
+            <div>
+              <span class="font-heading font-bold text-base text-[#0d2a1c] block">Total Amount</span>
+              <span class="text-[10px] text-gray-400">Includes all taxes & duties</span>
+            </div>
+            <span class="font-heading font-bold text-2xl text-[#123524]">
+              $<%= total %>
+            </span>
+          </div>
+
+          <!-- Proceed to Checkout Button -->
+          <a 
+            href="/checkout" 
+            class="w-full bg-[#123524] hover:bg-[#17422e] text-white font-semibold text-sm py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm"
+          >
+            <i class="fa-solid fa-lock text-xs"></i>
+            <span>Proceed to Checkout</span>
+          </a>
+
+          <!-- Trust Notes -->
+          <div class="text-center text-[11px] text-gray-400 space-y-1">
+            <div class="flex items-center justify-center gap-1.5 text-emerald-800">
+              <i class="fa-solid fa-shield-halved text-xs"></i>
+              <span class="font-medium">256-Bit Encrypted Checkout</span>
+            </div>
+            <p>Guaranteed 30-Day Money Back Returns</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <% } else { %>
+    <!-- Empty Cart State -->
+    <div class="bg-white rounded-3xl border border-gray-100 p-12 text-center max-w-lg mx-auto space-y-4 shadow-2xs">
+      <div class="w-16 h-16 rounded-full bg-[#123524]/5 text-[#123524] flex items-center justify-center mx-auto text-2xl">
+        <i class="fa-solid fa-cart-arrow-down"></i>
+      </div>
+      <h2 class="font-heading font-bold text-xl text-[#0d2a1c]">Your Cart is Currently Empty</h2>
+      <p class="text-xs text-gray-500 leading-relaxed">Looks like you haven't added anything yet. Explore our curated catalog and discover fresh picks for your lifestyle.</p>
+      <a href="/shop" class="inline-block bg-[#123524] text-white text-xs font-semibold px-7 py-3 rounded-full hover:bg-[#17422e] transition-colors shadow-xs">
+        Start Shopping Now &rarr;
+      </a>
+    </div>
+    <% } %>
+
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

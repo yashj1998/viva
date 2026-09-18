@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Sales Analytics — ViVA Seller Center' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 overflow-y-auto">
+      
+      <!-- Top Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="font-heading font-bold text-lg sm:text-xl text-[#123524]">Store Sales &amp; Performance Analytics</h1>
+          <p class="text-xs text-gray-500 mt-0.5">Comprehensive financial analytics, order volume trends, and seller performance metrics.</p>
+        </div>
+        <a href="/seller/dashboard" class="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-[#123524] hover:bg-[#1a4b33] text-white text-xs font-bold transition-colors shadow-xs">
+          <i class="fa-solid fa-chart-pie text-xs"></i> Overview Dashboard
+        </a>
+      </div>
+
+      <!-- Financial KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-emerald-700">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Store GMV</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <i class="fa-solid fa-dollar-sign text-sm"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl sm:text-2xl text-[#123524] truncate">$<%= analytics.totalGMV %></div>
+          <p class="text-[11px] text-gray-500">Gross Merchandise Value from orders</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-blue-700">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Fulfilled Orders</span>
+            <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+              <i class="fa-solid fa-receipt text-sm"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl sm:text-2xl text-blue-900 truncate"><%= analytics.totalOrders %></div>
+          <p class="text-[11px] text-gray-500">Orders containing your products</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-purple-700">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Units Sold</span>
+            <div class="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
+              <i class="fa-solid fa-box-open text-sm"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl sm:text-2xl text-purple-900 truncate"><%= analytics.totalUnits %></div>
+          <p class="text-[11px] text-gray-500">Physical units dispatched</p>
+        </div>
+
+        <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-xs space-y-2">
+          <div class="flex items-center justify-between text-amber-700">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Average Order Value (AOV)</span>
+            <div class="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
+              <i class="fa-solid fa-scale-balanced text-sm"></i>
+            </div>
+          </div>
+          <div class="font-heading font-bold text-xl sm:text-2xl text-amber-900 truncate">$<%= analytics.averageOrderValue %></div>
+          <p class="text-[11px] text-gray-500">Average basket value per order</p>
+        </div>
+      </div>
+
+      <!-- Merchant Partnership Tiers & Payouts Box -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-gray-200/80 p-4 sm:p-6 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-gem text-amber-500 text-sm"></i>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Merchant Tier &amp; Benefits</h3>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              Gold Partner
+            </span>
+          </div>
+
+          <div class="space-y-3 text-xs text-gray-600">
+            <div class="flex items-center justify-between py-1 border-b border-gray-50">
+              <span class="text-gray-500">Platform Commission Rate:</span>
+              <span class="font-bold text-gray-900">8.5% (Standard Tier)</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-gray-50">
+              <span class="text-gray-500">Storefront PDP Placement:</span>
+              <span class="font-bold text-emerald-700">Priority Search &amp; Featured Deals</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-gray-50">
+              <span class="text-gray-500">Next Payout Cycle:</span>
+              <span class="font-bold text-gray-900">Every Friday (Direct ACH Deposit)</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-gray-50">
+              <span class="text-gray-500">Fulfillment SLA:</span>
+              <span class="font-bold text-gray-900">Ship within 24-48 hours</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-[#123524] to-[#1c4d36] text-white rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-arrow-trend-up"></i> Growth Insights
+            </div>
+            <h3 class="font-heading font-bold text-lg text-white">Scale Your Sales with Top Picks</h3>
+            <p class="text-xs text-gray-300 leading-relaxed">
+              Products with discount percentages above 15% and ratings of 4.5+ are eligible for automated inclusion in ViVA Homepage Top Picks and category promotion strips.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="/seller/products" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-[#123524] font-bold text-xs rounded-xl transition-colors shadow-xs">
+              Manage Listings
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

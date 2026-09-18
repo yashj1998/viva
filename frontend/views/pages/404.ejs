@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <main class="flex-1 max-w-lg mx-auto px-4 py-16 text-center space-y-4">
+    <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-2xl text-gray-400">
+      <i class="fa-solid fa-compass"></i>
+    </div>
+    <span class="text-xs font-bold uppercase tracking-widest text-[#2c6b48]">404 Error</span>
+    <h1 class="font-heading font-bold text-3xl text-[#0d2a1c]">Page Not Found</h1>
+    <p class="text-xs text-gray-500 leading-relaxed">The page you were looking for doesn't exist or has moved. Return to the homepage or search our catalog.</p>
+    <div class="pt-4">
+      <a href="/" class="bg-[#123524] hover:bg-[#17422e] text-white text-xs font-semibold px-7 py-3 rounded-full transition-colors inline-block">
+        Return to Homepage &rarr;
+      </a>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

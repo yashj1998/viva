@@ -1,0 +1,294 @@
+<!-- Global Header -->
+<header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-xs">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-4">
+    
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-2.5 shrink-0 group">
+      <div class="w-10 h-10 rounded-xl bg-[#123524]/5 flex items-center justify-center text-[#123524] group-hover:scale-105 transition-transform">
+        <svg class="w-7 h-7 text-[#123524]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <path d="M3 6h18"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+          <!-- Leaf flourish -->
+          <path d="M12 12c1.5-1.5 3-1 3 1s-2 3-3 3c-1 0-3-1-3-3s1.5-2.5 3-1Z" stroke="#2c6b48" fill="#2c6b48" fill-opacity="0.2"/>
+        </svg>
+      </div>
+      <div class="flex flex-col">
+        <span class="font-heading font-bold text-2xl tracking-tight text-[#123524] leading-none">
+          Vi<span class="text-[#2c6b48]">V</span>A
+        </span>
+        <span class="text-[9px] font-semibold tracking-[0.22em] text-[#2c6b48] uppercase mt-0.5 leading-none">
+          Live Better
+        </span>
+      </div>
+    </a>
+
+    <!-- Center Search Bar -->
+    <div class="flex-1 max-w-xl hidden md:block">
+      <form action="/shop" method="GET" class="relative flex items-center">
+        <input 
+          type="text" 
+          name="q"
+          placeholder="Search products, brands and more..." 
+          class="w-full bg-[#f9fafb] hover:bg-white focus:bg-white text-sm text-[#16261d] placeholder-gray-400 pl-5 pr-12 py-2.5 rounded-full border border-gray-200 focus:border-[#123524] focus:ring-2 focus:ring-[#123524]/10 transition-all outline-none"
+        >
+        <button 
+          type="submit" 
+          aria-label="Search" 
+          class="absolute right-1.5 w-8 h-8 rounded-full bg-[#123524] hover:bg-[#17422e] text-white flex items-center justify-center transition-all duration-150 transform hover:scale-105"
+        >
+          <i class="fa-solid fa-magnifying-glass text-xs"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Right Actions: Account, Wishlist, Cart -->
+    <div class="flex items-center gap-5 sm:gap-7">
+      
+      <!-- Mobile Search Icon Trigger -->
+      <a href="/shop" class="md:hidden text-[#16261d] hover:text-[#123524] p-1.5" aria-label="Open Search">
+        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+      </a>
+
+      <!-- Account Dropdown / Link (Before & After Login) -->
+      <div id="account-menu-container" class="relative group">
+        <% if (typeof customer !== 'undefined' && customer) { %>
+          <!-- Trigger: Logged In Customer (Matching Exact Header Style) -->
+          <button 
+            type="button" 
+            id="account-menu-trigger" 
+            aria-haspopup="true" 
+            aria-expanded="false" 
+            class="flex flex-col items-center text-gray-700 hover:text-[#123524] transition-colors focus:outline-none cursor-pointer"
+          >
+            <i class="fa-regular fa-circle-user text-lg text-gray-700 group-hover:text-[#123524] transition-colors"></i>
+            <span class="text-[11px] font-medium text-gray-700 group-hover:text-[#123524] mt-0.5 hidden sm:flex items-center gap-1 truncate max-w-[85px]">
+              <%= customer.name ? customer.name.split(' ')[0] : 'Account' %>
+              <i class="fa-solid fa-chevron-down text-[8px] opacity-60 group-hover:rotate-180 transition-transform duration-200"></i>
+            </span>
+          </button>
+
+          <!-- Dropdown Menu: Customer (After Login) -->
+          <div 
+            id="account-dropdown-panel" 
+            class="account-dropdown-panel absolute right-0 top-full pt-1.5 w-64 z-50 transition-all duration-150 transform opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto [&.is-open]:opacity-100 [&.is-open]:translate-y-0 [&.is-open]:pointer-events-auto"
+          >
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-xl p-3 space-y-2">
+              
+              <!-- Customer Profile Badge Header -->
+              <div class="p-3 bg-gradient-to-br from-emerald-50/80 to-[#f3efe3]/60 rounded-xl border border-emerald-100/60 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#123524] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                  <%= customer.name ? customer.name.charAt(0).toUpperCase() : 'U' %>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs text-gray-900 truncate block"><%= customer.name %></span>
+                    <span class="bg-emerald-100 text-[#123524] text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0">Member</span>
+                  </div>
+                  <span class="text-[10px] text-gray-500 truncate block mt-0.5"><%= customer.email %></span>
+                </div>
+              </div>
+
+              <!-- Quick Links -->
+              <div class="py-1 text-xs font-medium text-gray-700 space-y-0.5">
+                <a href="/account" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-regular fa-user text-xs text-gray-400 w-4 text-center"></i>
+                  <span>My Account Overview</span>
+                </a>
+                <a href="/account?tab=orders" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-solid fa-box-open text-xs text-gray-400 w-4 text-center"></i>
+                  <span>My Orders</span>
+                </a>
+                <a href="/account?tab=addresses" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-solid fa-map-location-dot text-xs text-gray-400 w-4 text-center"></i>
+                  <span>Saved Addresses</span>
+                </a>
+                <a href="/account?tab=profile" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-solid fa-shield-halved text-xs text-gray-400 w-4 text-center"></i>
+                  <span>Profile & Password</span>
+                </a>
+                <a href="/wishlist" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-regular fa-heart text-xs text-gray-400 w-4 text-center"></i>
+                  <span>My Wishlist</span>
+                </a>
+                <a href="/track-order" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-solid fa-truck-fast text-xs text-gray-400 w-4 text-center"></i>
+                  <span>Track Order</span>
+                </a>
+
+                <div class="pt-1.5 mt-1 border-t border-gray-100 space-y-1">
+                  <a href="/seller/dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-amber-50/80 hover:bg-amber-100 text-amber-900 transition-colors font-semibold">
+                    <i class="fa-solid fa-store text-xs text-amber-700 w-4 text-center"></i>
+                    <span>Seller Dashboard</span>
+                  </a>
+                  <% if (customer.role === 'admin' || (typeof adminUser !== 'undefined' && adminUser)) { %>
+                    <a href="/admin" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-100 text-gray-700 transition-colors font-semibold">
+                      <i class="fa-solid fa-shield-halved text-xs text-emerald-700 w-4 text-center"></i>
+                      <span>Super Admin</span>
+                    </a>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Sign Out CTA -->
+              <div class="pt-1.5 border-t border-gray-100">
+                <a href="/logout" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-xs font-semibold">
+                  <i class="fa-solid fa-arrow-right-from-bracket text-xs w-4 text-center"></i>
+                  <span>Sign Out</span>
+                </a>
+              </div>
+
+            </div>
+          </div>
+
+        <% } else { %>
+
+          <!-- Trigger: Guest (Before Login) -->
+          <button 
+            type="button" 
+            id="account-menu-trigger" 
+            aria-haspopup="true" 
+            aria-expanded="false" 
+            class="flex flex-col items-center text-gray-700 hover:text-[#123524] transition-colors focus:outline-none cursor-pointer"
+          >
+            <i class="fa-regular fa-circle-user text-lg text-gray-700 group-hover:text-[#123524] transition-colors"></i>
+            <span class="text-[11px] font-medium text-gray-700 group-hover:text-[#123524] mt-0.5 hidden sm:flex items-center gap-1">
+              Sign In
+              <i class="fa-solid fa-chevron-down text-[8px] opacity-60 group-hover:rotate-180 transition-transform duration-200"></i>
+            </span>
+          </button>
+
+          <!-- Dropdown Menu: Guest (Before Login) -->
+          <div 
+            id="account-dropdown-panel" 
+            class="account-dropdown-panel absolute right-0 top-full pt-1.5 w-64 z-50 transition-all duration-150 transform opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto [&.is-open]:opacity-100 [&.is-open]:translate-y-0 [&.is-open]:pointer-events-auto"
+          >
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-xl p-4 space-y-3">
+              
+              <!-- Welcome & Primary CTA -->
+              <div class="text-center pb-3 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-full bg-[#123524]/5 text-[#123524] flex items-center justify-center mx-auto mb-2 text-base">
+                  <i class="fa-regular fa-circle-user"></i>
+                </div>
+                <p class="font-bold text-xs text-gray-900 leading-tight">Welcome to ViVA</p>
+                <p class="text-[11px] text-gray-500 mt-0.5">Sign in to track orders & manage cart</p>
+                
+                <a href="/login" class="mt-3 block w-full bg-[#123524] hover:bg-[#17422e] text-white text-xs font-semibold py-2 px-4 rounded-full text-center shadow-xs transition-all duration-150 transform hover:scale-[1.01]">
+                  Sign In
+                </a>
+                
+                <p class="text-[11px] text-gray-500 mt-2">
+                  New customer? <a href="/register" class="text-[#123524] font-bold hover:underline">Start here</a>
+                </p>
+              </div>
+
+              <!-- Quick Links for Guests -->
+              <div class="py-1 text-xs font-medium text-gray-700 space-y-0.5">
+                <a href="/account" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-regular fa-user text-xs text-gray-400 w-4 text-center"></i>
+                  <span>My Account</span>
+                </a>
+                <a href="/account?tab=orders" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-solid fa-box-open text-xs text-gray-400 w-4 text-center"></i>
+                  <span>My Orders</span>
+                </a>
+                <a href="/wishlist" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-regular fa-heart text-xs text-gray-400 w-4 text-center"></i>
+                  <span>Saved Wishlist</span>
+                </a>
+                <a href="/track-order" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-50 hover:text-[#123524] transition-colors">
+                  <i class="fa-solid fa-truck-fast text-xs text-gray-400 w-4 text-center"></i>
+                  <span>Track Order</span>
+                </a>
+                <div class="pt-1.5 mt-1 border-t border-gray-100">
+                  <a href="/seller/dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-amber-50/80 hover:bg-amber-100 text-amber-900 transition-colors font-semibold">
+                    <i class="fa-solid fa-store text-xs text-amber-700 w-4 text-center"></i>
+                    <span>Sell on ViVA (Seller Hub)</span>
+                  </a>
+                </div>
+                <% if (typeof adminUser !== 'undefined' && adminUser) { %>
+                  <div class="pt-1">
+                    <a href="/admin" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-gray-100 text-gray-700 transition-colors font-semibold">
+                      <i class="fa-solid fa-shield-halved text-xs text-emerald-700 w-4 text-center"></i>
+                      <span>Admin Portal</span>
+                    </a>
+                  </div>
+                <% } %>
+              </div>
+
+              <!-- Customer Care link -->
+              <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
+                <span>Need help?</span>
+                <a href="/contact" class="text-[#123524] font-semibold hover:underline flex items-center gap-1">
+                  Contact Support <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </a>
+              </div>
+
+            </div>
+          </div>
+
+        <% } %>
+      </div>
+
+      <!-- Wishlist (Desktop/Tablet - on mobile it lives in the floating bottom bar) -->
+      <a href="/wishlist" class="hidden sm:flex flex-col items-center text-gray-700 hover:text-[#123524] transition-colors group relative">
+        <div class="relative">
+          <i class="fa-regular fa-heart text-lg text-gray-700 group-hover:text-[#123524] transition-colors"></i>
+          <span id="header-wishlist-badge" class="absolute -top-1.5 -right-2 bg-[#e8756a] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+            <%= typeof wishlistCount !== 'undefined' ? wishlistCount : 3 %>
+          </span>
+        </div>
+        <span class="text-[11px] font-medium text-gray-700 group-hover:text-[#123524] mt-0.5">Wishlist</span>
+      </a>
+
+      <!-- Cart (Desktop/Tablet - on mobile it lives in the floating bottom bar) -->
+      <a href="/cart" class="hidden sm:flex flex-col items-center text-gray-700 hover:text-[#123524] transition-colors group relative">
+        <div class="relative">
+          <i class="fa-solid fa-cart-shopping text-lg text-gray-700 group-hover:text-[#123524] transition-colors"></i>
+          <span id="header-cart-badge" class="absolute -top-1.5 -right-2 bg-[#e8756a] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+            <%= typeof cartCount !== 'undefined' ? cartCount : 2 %>
+          </span>
+        </div>
+        <span class="text-[11px] font-medium text-gray-700 group-hover:text-[#123524] mt-0.5">Cart</span>
+      </a>
+
+    </div>
+
+  </div>
+</header>
+
+<!-- Account Menu Script for Mobile Click & Keyboard Navigation -->
+<script>
+  (function() {
+    const container = document.getElementById('account-menu-container');
+    const trigger = document.getElementById('account-menu-trigger');
+    const panel = document.getElementById('account-dropdown-panel');
+    if (!container || !trigger || !panel) return;
+
+    trigger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = panel.classList.contains('is-open');
+      if (isOpen) {
+        panel.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        panel.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!container.contains(e.target)) {
+        panel.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+        panel.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+</script>

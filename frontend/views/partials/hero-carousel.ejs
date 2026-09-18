@@ -1,0 +1,82 @@
+<!-- Hero Carousel Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+  <div class="swiper hero-swiper rounded-3xl overflow-hidden shadow-xs relative">
+    <div class="swiper-wrapper">
+      
+      <% (heroSlides || []).forEach(function(slide) { %>
+      <div class="swiper-slide bg-[#f3efe3] relative">
+        <div class="grid grid-cols-1 lg:grid-cols-12 items-center min-h-[auto] sm:min-h-[440px] md:min-h-[480px] p-5 sm:p-10 lg:p-14 relative">
+          
+          <!-- Summer Sale Vertical Ribbon / Badge (Desktop & Tablet) -->
+          <div class="hidden sm:flex absolute top-0 right-8 sm:right-16 z-20 bg-[#123524] text-white px-3.5 py-4 rounded-b-xl shadow-md text-center flex-col items-center">
+            <span class="text-[9px] sm:text-[10px] tracking-[0.2em] font-semibold text-emerald-200 uppercase">Summer</span>
+            <span class="font-heading font-bold text-xs sm:text-sm tracking-wider uppercase">Sale</span>
+            <div class="w-full h-px bg-white/20 my-1"></div>
+            <span class="text-[8px] sm:text-[9px] uppercase tracking-wider text-gray-300">Up to</span>
+            <span class="font-heading font-extrabold text-base sm:text-lg leading-tight text-amber-300">40%</span>
+            <span class="text-[8px] uppercase tracking-wider text-gray-300">Off</span>
+          </div>
+
+          <!-- Hero Left Column: Copy & Actions -->
+          <div class="lg:col-span-6 z-10 space-y-3.5 sm:space-y-6 max-w-xl">
+            
+            <!-- Summer Sale Compact Pill Badge (Mobile Only) -->
+            <div class="sm:hidden inline-flex items-center gap-2 bg-[#123524] text-white px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
+              <span class="text-emerald-300 uppercase tracking-wider text-[10px]">Summer Sale</span>
+              <span class="w-1 h-1 rounded-full bg-white/40"></span>
+              <span class="text-amber-300 font-bold text-xs">Up to 40% Off</span>
+            </div>
+
+            <h1 class="font-heading font-bold text-2xl sm:text-4xl md:text-5xl lg:text-[54px] text-[#0d2a1c] tracking-tight leading-[1.15]">
+              <%= slide.headline || 'Elevate Your Everyday' %>
+            </h1>
+            
+            <p class="text-gray-600 text-xs sm:text-base leading-relaxed max-w-md font-normal">
+              <%= slide.subcopy || 'Discover quality products across every category — made for the way you live.' %>
+            </p>
+
+            <div>
+              <a href="<%= slide.ctaUrl || '#products' %>" class="inline-flex items-center gap-2 bg-[#123524] hover:bg-[#17422e] text-white font-medium text-xs sm:text-base px-6 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm active:scale-95">
+                <span><%= slide.ctaLabel || 'Shop Now →' %></span>
+              </a>
+            </div>
+
+            <!-- Value / Trust Badges -->
+            <div class="pt-2 sm:pt-4 flex flex-wrap items-center gap-3 sm:gap-6 text-[11px] sm:text-xs text-gray-700 font-medium">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-regular fa-star text-[#123524]"></i>
+                <span>Premium Quality</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <i class="fa-regular fa-gem text-[#123524]"></i>
+                <span>Great Prices</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-users text-[#123524]"></i>
+                <span>Trusted by 10K+ Customers</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Right Column: Composite Image -->
+          <div class="lg:col-span-6 flex justify-center lg:justify-end mt-4 sm:mt-6 lg:mt-0 relative">
+            <div class="relative w-full max-w-xs sm:max-w-lg lg:max-w-none flex justify-center">
+              <img 
+                src="<%= slide.imageUrl || '/images/hero-composite.png' %>" 
+                alt="ViVA Modern Living Essentials" 
+                class="w-full max-h-[250px] sm:max-h-[380px] md:max-h-[420px] object-contain drop-shadow-md transition-transform duration-700 hover:scale-[1.02]"
+                loading="eager"
+              >
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <% }); %>
+
+    </div>
+
+    <!-- Swiper Pagination Dots -->
+    <div class="hero-pagination absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2"></div>
+  </div>
+</section>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Breadcrumbs & Banner -->
+  <div class="bg-[#f3efe3] border-b border-gray-200/60 py-6 sm:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+        <a href="/" class="hover:text-[#123524]">Home</a>
+        <span>/</span>
+        <span class="text-[#123524] font-semibold">Shop</span>
+        <% if (selectedCategory && selectedCategory !== 'all') { %>
+          <span>/</span>
+          <span class="capitalize text-gray-700 font-medium"><%= selectedCategory.replace('-', ' ') %></span>
+        <% } %>
+      </div>
+      <h1 class="font-heading font-bold text-2xl sm:text-3xl text-[#0d2a1c]">
+        <% if (searchQuery) { %>
+          Search Results for "<%= searchQuery %>"
+        <% } else if (selectedCategory && selectedCategory !== 'all') { %>
+          <span class="capitalize"><%= selectedCategory.replace('-', ' ') %></span> Collection
+        <% } else { %>
+          Shop All Categories
+        <% } %>
+      </h1>
+      <p class="text-xs sm:text-sm text-gray-600 mt-1 max-w-xl">
+        Explore quality curated essentials across every department with everyday price guarantees.
+      </p>
+    </div>
+  </div>
+
+  <!-- Catalog Main -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Filters Sidebar -->
+      <aside class="lg:col-span-3">
+        <!-- Mobile Filter Toggle Button -->
+        <button 
+          type="button" 
+          id="mobile-filter-toggle"
+          class="w-full lg:hidden bg-white rounded-2xl border border-gray-200/80 p-3.5 flex items-center justify-between text-xs font-semibold text-[#123524] shadow-xs mb-4 active:scale-95 transition-all"
+        >
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-[#2c6b48]"></i>
+            <span>Filter &amp; Refine Products</span>
+          </span>
+          <span class="flex items-center gap-1.5 text-gray-500 font-normal">
+            <span class="text-[11px]"><%= totalCount %> items</span>
+            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" id="filter-chevron"></i>
+          </span>
+        </button>
+
+        <div id="shop-filter-panel" class="hidden lg:block bg-white rounded-2xl border border-gray-100 p-5 shadow-2xs space-y-6 sticky top-24">
+          
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <h2 class="font-heading font-bold text-sm text-[#0d2a1c] flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-xs text-[#2c6b48]"></i>
+              <span>Filters</span>
+            </h2>
+            <a href="/shop" class="text-xs text-[#2c6b48] hover:underline font-medium">Reset All</a>
+          </div>
+
+          <!-- Categories Filter -->
+          <div>
+            <h3 class="font-semibold text-xs uppercase tracking-wider text-gray-400 mb-3">Categories</h3>
+            <ul class="space-y-1.5 text-xs">
+              <li>
+                <a href="/shop" class="flex items-center justify-between py-1.5 px-2.5 rounded-lg <%= selectedCategory === 'all' ? 'bg-[#123524] text-white font-semibold' : 'text-gray-700 hover:bg-gray-50' %> transition-colors">
+                  <span>All Categories</span>
+                  <span class="text-[10px] <%= selectedCategory === 'all' ? 'text-white/80' : 'text-gray-400' %>"><%= totalCount %></span>
+                </a>
+              </li>
+              <% (categories || []).filter(c => c.slug !== 'all').forEach(function(cat) { %>
+              <li>
+                <a href="/shop?category=<%= cat.slug %>" class="flex items-center justify-between py-1.5 px-2.5 rounded-lg <%= selectedCategory.toLowerCase() === cat.slug.toLowerCase() ? 'bg-[#123524] text-white font-semibold' : 'text-gray-700 hover:bg-gray-50' %> transition-colors">
+                  <span><%= cat.name %></span>
+                  <i class="fa-solid fa-chevron-right text-[9px] <%= selectedCategory.toLowerCase() === cat.slug.toLowerCase() ? 'text-white/60' : 'text-gray-300' %>"></i>
+                </a>
+              </li>
+              <% }); %>
+            </ul>
+          </div>
+
+          <!-- Price Filter Form -->
+          <form action="/shop" method="GET" class="space-y-3 pt-3 border-t border-gray-100">
+            <% if (selectedCategory) { %>
+              <input type="hidden" name="category" value="<%= selectedCategory %>">
+            <% } %>
+            <% if (sortBy) { %>
+              <input type="hidden" name="sort" value="<%= sortBy %>">
+            <% } %>
+
+            <h3 class="font-semibold text-xs uppercase tracking-wider text-gray-400">Price Range</h3>
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <span class="absolute left-2.5 top-2 text-xs text-gray-400">$</span>
+                <input type="number" name="minPrice" value="<%= minPrice || 0 %>" min="0" max="1000" class="w-full text-xs pl-6 pr-2 py-1.5 border border-gray-200 rounded-lg outline-none focus:border-[#123524]">
+              </div>
+              <span class="text-gray-400 text-xs">-</span>
+              <div class="relative flex-1">
+                <span class="absolute left-2.5 top-2 text-xs text-gray-400">$</span>
+                <input type="number" name="maxPrice" value="<%= maxPrice || 500 %>" min="1" max="1000" class="w-full text-xs pl-6 pr-2 py-1.5 border border-gray-200 rounded-lg outline-none focus:border-[#123524]">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-gray-100 hover:bg-[#123524] hover:text-white text-xs font-semibold py-2 rounded-lg transition-colors">
+              Apply Price
+            </button>
+          </form>
+
+        </div>
+      </aside>
+
+      <!-- Right Products Grid -->
+      <section class="lg:col-span-9 space-y-6">
+        
+        <!-- Controls Bar: Item count and Sort -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+          <div class="text-xs text-gray-500">
+            Showing <strong class="text-[#16261d]"><%= products.length %></strong> items
+          </div>
+
+          <!-- Sort Selector -->
+          <div class="flex items-center gap-2 text-xs">
+            <label for="sort-select" class="text-gray-500 font-medium">Sort by:</label>
+            <form action="/shop" method="GET" id="sort-form">
+              <% if (selectedCategory) { %><input type="hidden" name="category" value="<%= selectedCategory %>"><% } %>
+              <% if (searchQuery) { %><input type="hidden" name="q" value="<%= searchQuery %>"><% } %>
+              <select 
+                id="sort-select" 
+                name="sort" 
+                onchange="this.form.submit()"
+                class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-[#16261d] font-medium focus:border-[#123524] outline-none cursor-pointer"
+              >
+                <option value="featured" <%= sortBy === 'featured' ? 'selected' : '' %>>Featured</option>
+                <option value="price-low" <%= sortBy === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                <option value="price-high" <%= sortBy === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                <option value="rating" <%= sortBy === 'rating' ? 'selected' : '' %>>Top Rated</option>
+                <option value="discount" <%= sortBy === 'discount' ? 'selected' : '' %>>Biggest Discount</option>
+              </select>
+            </form>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <% if (products && products.length > 0) { %>
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            <% products.forEach(function(product) { %>
+              <div class="h-full">
+                <%- include('../partials/product-card', { product: product }) %>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <!-- Empty State -->
+          <div class="bg-white rounded-3xl border border-gray-100 p-12 text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-gray-400 text-2xl">
+              <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h3 class="font-heading font-bold text-lg text-[#0d2a1c]">No products matched your criteria</h3>
+            <p class="text-xs text-gray-500 max-w-sm mx-auto">Try resetting filters or adjusting your price limits to find what you are looking for.</p>
+            <a href="/shop" class="inline-block bg-[#123524] text-white text-xs font-semibold px-6 py-2.5 rounded-full hover:bg-[#17422e] transition-colors">
+              Reset Filters
+            </a>
+          </div>
+        <% } %>
+
+      </section>
+
+    </div>
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+  <script>
+    (function() {
+      const toggle = document.getElementById('mobile-filter-toggle');
+      const panel = document.getElementById('shop-filter-panel');
+      const chevron = document.getElementById('filter-chevron');
+      if (toggle && panel) {
+        toggle.addEventListener('click', function() {
+          panel.classList.toggle('hidden');
+          if (chevron) chevron.classList.toggle('rotate-180');
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Editorial Hero Header -->
+  <div class="bg-[#eef1e6] border-b border-[#e2e8d8] py-10 sm:py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div class="space-y-3 max-w-xl">
+        <span class="text-xs font-bold uppercase tracking-wider text-[#2c6b48]">The New Season Edit</span>
+        <h1 class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-[#0d2a1c] tracking-tight">
+          Fresh Styles & Living Innovations Just In
+        </h1>
+        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+          From breathable washed linen shirts to next-gen audio tech and home comforts, discover our newest additions for better living.
+        </p>
+      </div>
+
+      <div class="w-32 h-32 sm:w-40 sm:h-40 shrink-0">
+        <img src="/images/banners/handbag.png" alt="Fresh Styles" class="w-full h-full object-contain drop-shadow-md">
+      </div>
+    </div>
+  </div>
+
+  <!-- New Arrivals Grid -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-10">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="font-heading font-bold text-xl text-[#0d2a1c]">Latest Releases</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Updated weekly with verified authenticity.</p>
+      </div>
+      <a href="/shop" class="text-xs sm:text-sm font-semibold text-[#123524] hover:underline">
+        See All Products &rarr;
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+      <% (products || []).forEach(function(product) { %>
+        <div class="h-full">
+          <%- include('../partials/product-card', { product: product }) %>
+        </div>
+      <% }); %>
+    </div>
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

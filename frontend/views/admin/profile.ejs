@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Seller Store Profile — ViVA Admin' %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-heading { font-family: 'Poppins', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fafaf9] text-[#16261d] min-h-screen flex">
+  
+  <%- include('sidebar') %>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <%- include('topbar') %>
+
+    <main class="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto max-w-5xl">
+      
+      <!-- Feedback Message -->
+      <% if (message) { %>
+        <div class="p-4 rounded-xl text-xs font-semibold flex items-center justify-between shadow-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><%= message %></span>
+          </div>
+          <button onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900">&times;</button>
+        </div>
+      <% } %>
+
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+              <%= isSeller ? 'Verified Seller Account' : 'Global Platform Admin' %>
+            </span>
+            <span class="text-xs text-gray-400">• ID: <%= profile._id || 'Primary' %></span>
+          </div>
+          <h2 class="font-heading font-bold text-2xl text-[#123524] mt-1">Seller Store Profile &amp; Settings</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Customize your public merchant identity, store banners, customer contact information, and fulfillment policies.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/shop" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 text-xs font-bold transition-colors shadow-2xs">
+            <i class="fa-solid fa-arrow-up-right-from-square text-emerald-700 text-xs"></i> View Live Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Store Showcase Card / Banner Preview -->
+      <div class="relative bg-white rounded-3xl border border-gray-200/80 shadow-xs overflow-hidden">
+        <!-- Banner Image Container -->
+        <div class="h-44 sm:h-52 w-full bg-[#123524] relative overflow-hidden">
+          <img 
+            id="liveBannerImg" 
+            src="<%= profile.bannerUrl || '/images/hero-composite.png' %>" 
+            alt="Store Banner" 
+            class="w-full h-full object-cover object-center opacity-85 transition-all duration-300"
+            onerror="this.src='/images/hero-composite.png'"
+          >
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+          
+          <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl text-[11px] font-bold text-[#123524] flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-store text-emerald-600"></i>
+            <span>Public Merchant Preview</span>
+          </div>
+        </div>
+
+        <!-- Store Identity Ribbon -->
+        <div class="p-6 pt-0 relative flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 sm:-mt-14">
+          <div class="flex items-end gap-4">
+            <!-- Logo Avatar -->
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white border-4 border-white shadow-md overflow-hidden shrink-0 flex items-center justify-center">
+              <img 
+                id="liveLogoImg" 
+                src="<%= profile.logoUrl || '/images/viva-logo.png' %>" 
+                alt="Store Logo" 
+                class="w-full h-full object-contain p-2"
+                onerror="this.src='/images/viva-logo.png'"
+              >
+            </div>
+            
+            <div class="space-y-1 pb-1">
+              <div class="flex items-center gap-2">
+                <h3 id="liveStoreNameText" class="font-heading font-bold text-xl text-gray-900 leading-tight">
+                  <%= profile.storeName || 'Apex Modern Living' %>
+                </h3>
+                <i class="fa-solid fa-circle-check text-emerald-600 text-sm" title="Verified Merchant"></i>
+              </div>
+              <p id="liveTaglineText" class="text-xs text-gray-500 line-clamp-1 max-w-lg">
+                <%= profile.storeDescription || 'Curated lifestyle essentials, audio hardware, and modern living accessories.' %>
+              </p>
+            </div>
+          </div>
+
+          <!-- Merchant Fast KPI Badges -->
+          <div class="flex items-center gap-3 shrink-0 pt-2 sm:pt-0">
+            <div class="bg-gray-50 px-3.5 py-2 rounded-xl border border-gray-100 text-center">
+              <span class="block text-[10px] uppercase font-bold text-gray-400">Products</span>
+              <span class="text-sm font-extrabold text-[#123524]"><%= stats ? stats.productCount : 0 %></span>
+            </div>
+            <div class="bg-gray-50 px-3.5 py-2 rounded-xl border border-gray-100 text-center">
+              <span class="block text-[10px] uppercase font-bold text-gray-400">Orders</span>
+              <span class="text-sm font-extrabold text-[#123524]"><%= stats ? stats.orderCount : 0 %></span>
+            </div>
+            <div class="bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-100 text-center">
+              <span class="block text-[10px] uppercase font-bold text-emerald-600">Sales Volume</span>
+              <span class="text-sm font-extrabold text-emerald-800">$<%= stats ? stats.revenue : '0.00' %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Form -->
+      <form action="/admin/profile" method="POST" class="space-y-6">
+        
+        <!-- Section 1: Store Branding & Identity -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-store text-emerald-700 text-sm"></i>
+              <h3 class="font-heading font-bold text-sm text-[#123524]">Store Identity &amp; Branding</h3>
+            </div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Required for Public Catalog</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Store / Brand Name *</label>
+              <input 
+                type="text" 
+                name="storeName" 
+                id="storeNameInput"
+                value="<%= profile.storeName || '' %>" 
+                required 
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                oninput="document.getElementById('liveStoreNameText').innerText = this.value || 'Store Name'"
+              >
+              <p class="text-[10px] text-gray-400 mt-1">Displayed on product detail pages and seller badges.</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Merchant Contact Person</label>
+              <input 
+                type="text" 
+                name="name" 
+                value="<%= profile.name || '' %>" 
+                readonly
+                class="w-full px-3.5 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
+              >
+              <p class="text-[10px] text-gray-400 mt-1">Staff account linked to this merchant storefront.</p>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block font-bold text-gray-700 mb-1">Store Tagline &amp; About Description</label>
+              <textarea 
+                name="storeDescription" 
+                id="storeDescriptionInput"
+                rows="3" 
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                placeholder="Describe your store heritage, quality ethos, and products..."
+                oninput="document.getElementById('liveTaglineText').innerText = this.value || 'Curated lifestyle essentials.'"
+              ><%= profile.storeDescription || '' %></textarea>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Store Logo Image URL</label>
+              <div class="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  name="logoUrl" 
+                  id="logoUrlInput"
+                  value="<%= profile.logoUrl || '/images/viva-logo.png' %>" 
+                  class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                  oninput="document.getElementById('liveLogoImg').src = this.value"
+                >
+              </div>
+              <p class="text-[10px] text-gray-400 mt-1">Square PNG/SVG format recommended (minimum 200x200px).</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Store Showcase Banner URL</label>
+              <div class="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  name="bannerUrl" 
+                  id="bannerUrlInput"
+                  value="<%= profile.bannerUrl || '/images/hero-composite.png' %>" 
+                  class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                  oninput="document.getElementById('liveBannerImg').src = this.value"
+                >
+              </div>
+              <p class="text-[10px] text-gray-400 mt-1">Wide hero ratio recommended (1600x500px).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Business & Contact Information -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-address-book text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Merchant Contact &amp; Warehouse Location</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Official Business Email</label>
+              <input 
+                type="email" 
+                name="businessEmail" 
+                value="<%= profile.businessEmail || '' %>" 
+                placeholder="orders@merchant.com"
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+              >
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Customer Support Phone</label>
+              <input 
+                type="text" 
+                name="businessPhone" 
+                value="<%= profile.businessPhone || '' %>" 
+                placeholder="+1 (555) 000-0000"
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+              >
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block font-bold text-gray-700 mb-1">Warehouse / Return Address</label>
+              <input 
+                type="text" 
+                name="businessAddress" 
+                value="<%= profile.businessAddress || '' %>" 
+                placeholder="100 Innovation Way, Suite 400, Austin, TX 78701"
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+              >
+              <p class="text-[10px] text-gray-400 mt-1">Used for return shipments and printed shipping slips.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Legal, Tax & Fulfillment Policies -->
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs space-y-4">
+          <div class="border-b border-gray-100 pb-3 flex items-center gap-2">
+            <i class="fa-solid fa-file-contract text-emerald-700 text-sm"></i>
+            <h3 class="font-heading font-bold text-sm text-[#123524]">Tax Compliance &amp; Customer Policies</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Tax ID / VAT Registration #</label>
+              <input 
+                type="text" 
+                name="taxId" 
+                value="<%= (profile.businessInfo && profile.businessInfo.taxId) || '' %>" 
+                placeholder="e.g. TAX-TX-781920"
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+              >
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Commercial Registration / EIN</label>
+              <input 
+                type="text" 
+                name="registrationNumber" 
+                value="<%= (profile.businessInfo && profile.businessInfo.registrationNumber) || '' %>" 
+                placeholder="e.g. REG-2024-APEX"
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+              >
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Return &amp; Refund Policy</label>
+              <textarea 
+                name="returnPolicy" 
+                rows="3" 
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                placeholder="e.g. 30-day money-back guarantee with original packaging..."
+              ><%= (profile.businessInfo && profile.businessInfo.returnPolicy) || '' %></textarea>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Shipping &amp; Fulfillment Policy</label>
+              <textarea 
+                name="shippingPolicy" 
+                rows="3" 
+                class="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all"
+                placeholder="e.g. Orders dispatched within 24 business hours via FedEx/UPS..."
+              ><%= (profile.businessInfo && profile.businessInfo.shippingPolicy) || '' %></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Save Bar -->
+        <div class="sticky bottom-4 bg-white/95 backdrop-blur border border-gray-200/90 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+          <div class="text-xs text-gray-500 flex items-center gap-2">
+            <i class="fa-solid fa-arrows-rotate text-emerald-600"></i>
+            <span>Profile updates sync immediately with all customer orders and catalog views.</span>
+          </div>
+          <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#123524] text-white text-xs font-bold hover:bg-[#1a4b33] transition-colors shadow-xs">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Save Store Profile
+          </button>
+        </div>
+
+      </form>
+    </main>
+  </div>
+
+</body>
+</html>

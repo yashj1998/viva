@@ -1,0 +1,141 @@
+<% const current = typeof activePage !== 'undefined' ? activePage : 'dashboard'; %>
+<% const seller = typeof currentSeller !== 'undefined' ? currentSeller : (typeof currentUser !== 'undefined' ? currentUser : {}); %>
+
+<aside class="w-64 bg-[#123524] text-white flex-shrink-0 flex flex-col justify-between hidden md:flex border-r border-[#1a4b33] shadow-md z-30 min-h-screen">
+  <div>
+    <!-- Brand Header -->
+    <div class="p-5 border-b border-white/10 flex items-center justify-between">
+      <a href="/seller/dashboard" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 rounded-xl bg-amber-400 text-[#123524] flex items-center justify-center font-bold text-base shadow-xs group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-store"></i>
+        </div>
+        <div>
+          <div class="font-heading font-bold text-sm tracking-tight text-white leading-tight flex items-center gap-1">
+            <span>ViVA</span>
+            <span class="text-amber-400 font-semibold text-xs">Seller Center</span>
+          </div>
+          <span class="text-[9px] uppercase tracking-wider text-emerald-300 font-semibold block">
+            Merchant Portal
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Store Profile Pill -->
+    <div class="px-4 py-3 mx-3 mt-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-2xs border border-white/20">
+        <img src="<%= seller.logoUrl || '/images/viva-logo.png' %>" alt="Store Logo" class="max-h-full max-w-full object-contain" onerror="this.src='/images/viva-logo.png'">
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="text-xs font-bold text-white truncate flex items-center gap-1">
+          <span class="truncate"><%= seller.storeName || 'My Store' %></span>
+          <i class="fa-solid fa-circle-check text-amber-400 text-[10px]" title="Verified Merchant"></i>
+        </div>
+        <div class="text-[10px] text-emerald-300 font-mono truncate">
+          <%= seller.email || 'seller@viva.com' %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="p-3 space-y-1 text-xs">
+      <div class="px-3 py-1.5 text-[10px] font-bold text-white/40 uppercase tracking-wider">
+        Store Operations
+      </div>
+
+      <!-- Dashboard -->
+      <a 
+        href="/seller/dashboard" 
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'dashboard' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+      >
+        <i class="fa-solid fa-chart-pie text-sm w-4 text-center"></i>
+        <span>Dashboard Overview</span>
+      </a>
+
+      <!-- Products Catalog -->
+      <a 
+        href="/seller/products" 
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'products' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+      >
+        <i class="fa-solid fa-boxes-stacked text-sm w-4 text-center"></i>
+        <span>My Products Catalog</span>
+      </a>
+
+      <!-- Orders & Fulfillment -->
+      <a 
+        href="/seller/orders" 
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'orders' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+      >
+        <i class="fa-solid fa-receipt text-sm w-4 text-center"></i>
+        <span>Orders &amp; Fulfillment</span>
+      </a>
+
+      <!-- Stock & Inventory -->
+      <a 
+        href="/seller/inventory" 
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'inventory' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+      >
+        <i class="fa-solid fa-warehouse text-sm w-4 text-center"></i>
+        <span>Stock &amp; Inventory</span>
+      </a>
+
+      <div class="px-3 pt-3 pb-1 text-[10px] font-bold text-white/40 uppercase tracking-wider">
+        Store Growth &amp; Brand
+      </div>
+
+      <!-- Analytics -->
+      <a 
+        href="/seller/analytics" 
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'analytics' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+      >
+        <i class="fa-solid fa-chart-line text-sm w-4 text-center"></i>
+        <span>Sales Analytics</span>
+      </a>
+
+      <!-- Store Profile & Policies -->
+      <a 
+        href="/seller/profile" 
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold transition-all <%= current === 'profile' ? 'bg-amber-400 text-[#123524] shadow-xs font-bold' : 'text-white/80 hover:bg-white/10 hover:text-white' %>"
+      >
+        <i class="fa-solid fa-id-card text-sm w-4 text-center"></i>
+        <span>Store Profile &amp; Policies</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Bottom Utilities -->
+  <div class="p-3 border-t border-white/10 space-y-2 text-xs">
+    <!-- View Customer Storefront -->
+    <a 
+      href="/" 
+      target="_blank"
+      class="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-emerald-200 transition-colors"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+        <span>View Live Storefront</span>
+      </div>
+      <i class="fa-solid fa-chevron-right text-[9px] opacity-60"></i>
+    </a>
+
+    <% if (typeof currentUser !== 'undefined' && currentUser.role === 'admin') { %>
+      <!-- Switch to Root Super Admin -->
+      <a 
+        href="/admin" 
+        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 font-semibold transition-colors"
+      >
+        <i class="fa-solid fa-shield-halved text-[11px]"></i>
+        <span>Platform Admin Console</span>
+      </a>
+    <% } %>
+
+    <!-- Sign Out -->
+    <a 
+      href="/seller/logout" 
+      class="flex items-center gap-2 px-3 py-2 rounded-xl text-rose-300 hover:bg-rose-500/10 transition-colors font-semibold"
+    >
+      <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
+      <span>Sign Out</span>
+    </a>
+  </div>
+</aside>

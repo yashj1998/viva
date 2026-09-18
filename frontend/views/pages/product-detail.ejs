@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-white border-b border-gray-100 py-3.5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center flex-wrap gap-2 text-xs text-gray-500">
+        <a href="/" class="hover:text-[#123524] transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-house text-[10px]"></i>
+          <span>Home</span>
+        </a>
+        <span>/</span>
+        <a href="/shop" class="hover:text-[#123524] transition-colors">Shop</a>
+        <span>/</span>
+        <a href="/shop?category=<%= (product.category || 'general').toLowerCase().replace(/\s+/g, '-') %>" class="hover:text-[#123524] transition-colors">
+          <%= product.category %>
+        </a>
+        <span>/</span>
+        <span class="text-[#123524] font-semibold truncate max-w-xs sm:max-w-md"><%= product.name %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Main Surface -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-12">
+    
+    <!-- Top Hero Card: Gallery & Purchasing Details -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 bg-white rounded-3xl border border-gray-200/70 p-6 sm:p-10 shadow-2xs">
+      
+      <!-- Left: Interactive Gallery -->
+      <div class="lg:col-span-6 flex flex-col gap-4">
+        
+        <!-- Main Image Container -->
+        <div class="relative w-full h-80 sm:h-[440px] bg-gradient-to-b from-gray-50 to-gray-100/50 rounded-2xl p-6 sm:p-8 flex items-center justify-center overflow-hidden border border-gray-100 group">
+          
+          <!-- Discount Badge -->
+          <% if (product.discountPercent) { %>
+          <div class="absolute top-4 left-4 z-10 bg-[#e77b74] text-white text-xs font-bold px-3 py-1 rounded-lg shadow-2xs">
+            -<%= product.discountPercent %>% OFF
+          </div>
+          <% } %>
+
+          <!-- Custom Deal / Highlight Badge from Admin -->
+          <% if (product.badgeText) { %>
+          <div class="absolute top-4 right-4 z-10 bg-[#123524] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-lg shadow-2xs flex items-center gap-1.5">
+            <i class="fa-solid fa-fire text-amber-400 text-[10px]"></i>
+            <span><%= product.badgeText %></span>
+          </div>
+          <% } %>
+
+          <!-- Primary Image with Smooth Zoom -->
+          <img 
+            id="mainProductImage" 
+            src="<%= product.primaryImageUrl %>" 
+            alt="<%= product.name %>" 
+            class="max-h-[280px] sm:max-h-[360px] w-auto object-contain drop-shadow-md transition-all duration-300 group-hover:scale-105 select-none"
+          >
+
+          <!-- Subtle Studio Notice -->
+          <div class="absolute bottom-3 left-4 text-[10px] text-gray-400 flex items-center gap-1.5 font-medium">
+            <i class="fa-solid fa-expand text-[9px]"></i>
+            <span>Hover to inspect studio details</span>
+          </div>
+        </div>
+
+        <!-- Thumbnail Gallery Strip (Interactive) -->
+        <% 
+          const allImages = [product.primaryImageUrl];
+          if (product.galleryImages && Array.isArray(product.galleryImages)) {
+            product.galleryImages.forEach(img => {
+              if (img && !allImages.includes(img)) allImages.push(img);
+            });
+          }
+        %>
+        <div class="flex items-center gap-3 overflow-x-auto py-1">
+          <% allImages.forEach(function(imgUrl, idx) { %>
+          <button 
+            type="button" 
+            onclick="switchMainImage('<%= imgUrl %>', this)" 
+            class="thumb-btn w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl p-2 border-2 transition-all flex items-center justify-center shrink-0 <%= idx === 0 ? 'border-[#123524] ring-2 ring-[#123524]/20' : 'border-gray-200 hover:border-gray-300' %>"
+          >
+            <img src="<%= imgUrl %>" alt="Thumbnail <%= idx + 1 %>" class="max-h-full max-w-full object-contain">
+          </button>
+          <% }); %>
+        </div>
+
+      </div>
+
+      <!-- Right: Product Purchasing & Configuration -->
+      <div class="lg:col-span-6 flex flex-col justify-between space-y-6">
+        
+        <div class="space-y-4">
+          
+          <!-- Category & Stock Status -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <span class="bg-[#123524]/10 text-[#123524] text-xs font-semibold px-3 py-1 rounded-full">
+              <%= product.category %>
+            </span>
+            <span class="text-xs text-gray-400">·</span>
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <%= product.brand || 'ViVA Essentials' %>
+            </span>
+            <span class="text-xs text-gray-400">·</span>
+            <div class="text-xs font-medium flex items-center gap-1.5 <%= (product.stockQuantity && product.stockQuantity > 0) ? 'text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full' : 'text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full' %>">
+              <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <span><%= (product.stockQuantity && product.stockQuantity > 0) ? `In Stock (${product.stockQuantity} units available)` : 'Out of Stock' %></span>
+            </div>
+          </div>
+
+          <!-- Product Title -->
+          <h1 class="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-[#0d2a1c] tracking-tight leading-snug">
+            <%= product.name %>
+          </h1>
+
+          <!-- Rating & Verified Reviews -->
+          <div class="flex items-center gap-3 text-xs">
+            <div class="flex text-[#f0a83e] text-xs">
+              <% const r = Math.round(product.ratingAvg || 4.8); %>
+              <% for(let i = 0; i < 5; i++) { %>
+                <i class="<%= i < r ? 'fa-solid' : 'fa-regular' %> fa-star"></i>
+              <% } %>
+            </div>
+            <span class="font-bold text-gray-800"><%= (product.ratingAvg || 4.8).toFixed(1) %> / 5.0</span>
+            <span class="text-gray-300">|</span>
+            <a href="#tab-reviews" onclick="switchTab('reviews')" class="text-gray-500 hover:text-[#123524] underline flex items-center gap-1">
+              <span><%= (product.ratingCount || 100).toLocaleString() %> Verified Customer Reviews</span>
+            </a>
+          </div>
+
+          <!-- Price Display & Savings -->
+          <div class="p-4 bg-[#fafaf9] rounded-2xl border border-gray-100/80 space-y-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="font-heading font-bold text-3xl sm:text-4xl text-[#c8503f]">
+                $<%= product.salePrice.toFixed(2) %>
+              </span>
+              <% if (product.price > product.salePrice) { %>
+              <span class="text-base sm:text-lg text-gray-400 line-through">
+                $<%= product.price.toFixed(2) %>
+              </span>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-md">
+                Save $<%= (product.price - product.salePrice).toFixed(2) %> (<%= product.discountPercent %>%)
+              </span>
+              <% } %>
+            </div>
+            <p class="text-[11px] text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-shield-check text-emerald-600"></i>
+              <span>Price inclusive of all taxes · Free standard delivery on orders over $49</span>
+            </p>
+          </div>
+
+          <!-- Product Short Narrative Description -->
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            <%= product.description || 'Crafted with premium materials for maximum durability and everyday performance. Designed for modern living with full manufacturer warranty, hassle-free returns, and customer satisfaction assurance.' %>
+          </p>
+
+          <!-- Color Variant Selector -->
+          <% 
+            const colorOptions = (product.colors && product.colors.length > 0) 
+              ? product.colors 
+              : ['Classic Black', 'Natural Beige', 'Forest Green']; 
+          %>
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-gray-700">Select Color:</span>
+              <span id="selectedColorName" class="font-medium text-[#123524]"><%= colorOptions[0] %></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <% colorOptions.forEach(function(col, cIdx) { %>
+              <button 
+                type="button" 
+                onclick="selectColor('<%= col %>', this)" 
+                class="color-pill px-3 py-1.5 rounded-xl border text-xs font-medium transition-all <%= cIdx === 0 ? 'border-[#123524] bg-[#123524] text-white' : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300' %>"
+              >
+                <%= col %>
+              </button>
+              <% }); %>
+            </div>
+          </div>
+
+          <!-- Size / Option Selector -->
+          <% 
+            const sizeOptions = (product.sizes && product.sizes.length > 0) 
+              ? product.sizes 
+              : ['Standard', 'Pro']; 
+          %>
+          <div class="space-y-2 pt-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-gray-700">Specification / Edition:</span>
+              <span id="selectedSizeName" class="font-medium text-[#123524]"><%= sizeOptions[0] %></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <% sizeOptions.forEach(function(sz, sIdx) { %>
+              <button 
+                type="button" 
+                onclick="selectSize('<%= sz %>', this)" 
+                class="size-pill px-3 py-1.5 rounded-xl border text-xs font-medium transition-all <%= sIdx === 0 ? 'border-[#123524] bg-[#123524] text-white' : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300' %>"
+              >
+                <%= sz %>
+              </button>
+              <% }); %>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Quantity, Add to Cart & Buy Now Section -->
+        <div id="purchaseActionArea" class="space-y-4 pt-4 border-t border-gray-100">
+          
+          <div class="flex items-center gap-4">
+            
+            <!-- Quantity Counter Stepper -->
+            <div class="flex items-center border border-gray-200 rounded-2xl bg-gray-50 p-1">
+              <button 
+                type="button" 
+                onclick="changeQty(-1)" 
+                class="w-8 h-8 rounded-xl bg-white hover:bg-gray-100 text-gray-700 flex items-center justify-center font-bold text-sm transition-colors shadow-2xs"
+                aria-label="Decrease quantity"
+              >
+                &minus;
+              </button>
+              <input 
+                type="number" 
+                id="productQty" 
+                value="1" 
+                min="1" 
+                max="<%= product.stockQuantity || 50 %>" 
+                class="w-12 text-center text-xs font-bold text-gray-800 bg-transparent outline-none"
+                readonly
+              >
+              <button 
+                type="button" 
+                onclick="changeQty(1)" 
+                class="w-8 h-8 rounded-xl bg-white hover:bg-gray-100 text-gray-700 flex items-center justify-center font-bold text-sm transition-colors shadow-2xs"
+                aria-label="Increase quantity"
+              >
+                &#43;
+              </button>
+            </div>
+
+            <!-- Primary Add to Cart Button -->
+            <button 
+              type="button" 
+              id="mainAddToCartBtn" 
+              data-id="<%= product._id || product.slug %>"
+              class="btn-add-cart flex-1 bg-[#123524] hover:bg-[#17422e] text-white font-semibold text-xs sm:text-sm py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2.5 transition-all duration-200 transform hover:-translate-y-0.5 shadow-xs active:translate-y-0"
+            >
+              <i class="fa-solid fa-cart-shopping text-sm"></i>
+              <span id="btnCartText">Add to Cart &middot; $<%= product.salePrice.toFixed(2) %></span>
+            </button>
+
+            <!-- Direct Buy Now Button -->
+            <button 
+              type="button" 
+              onclick="buyNowDirect('<%= product._id || product.slug %>')" 
+              class="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs sm:text-sm py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xs"
+            >
+              <i class="fa-solid fa-bolt text-xs"></i>
+              <span class="hidden sm:inline">Buy Now</span>
+            </button>
+
+            <!-- Wishlist Button -->
+            <button 
+              type="button" 
+              class="btn-wishlist-toggle w-11 h-11 rounded-2xl border border-gray-200 hover:border-[#123524] text-gray-600 hover:text-rose-600 flex items-center justify-center transition-colors shadow-2xs"
+              title="Save to Wishlist"
+            >
+              <i class="fa-regular fa-heart text-base"></i>
+            </button>
+
+          </div>
+
+          <!-- Trust Proposition Badges -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-gray-100 text-[11px] text-gray-500">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#123524] flex items-center justify-center text-xs">
+                <i class="fa-solid fa-truck-fast"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-semibold text-gray-700">Free Shipping</span>
+                <span class="text-[10px]">On orders over $49</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-rotate-left"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-semibold text-gray-700">30-Day Returns</span>
+                <span class="text-[10px]">Hassle-free guarantee</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-semibold text-gray-700">2-Yr Warranty</span>
+                <span class="text-[10px]">Official protection</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-semibold text-gray-700">Secure Payment</span>
+                <span class="text-[10px]">256-bit SSL encrypted</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- SECTION: Comprehensive Product Information Tabs -->
+    <div class="bg-white rounded-3xl border border-gray-200/70 p-6 sm:p-10 shadow-2xs space-y-8">
+      
+      <!-- Tabs Navigation Bar -->
+      <div class="flex items-center gap-3 sm:gap-6 border-b border-gray-100 overflow-x-auto pb-3">
+        <button 
+          type="button" 
+          onclick="switchTab('overview')" 
+          id="tabBtn-overview" 
+          class="tab-btn font-heading text-xs sm:text-sm font-bold pb-2 border-b-2 border-[#123524] text-[#123524] transition-colors whitespace-nowrap"
+        >
+          <i class="fa-solid fa-circle-info mr-1.5"></i> Description & Features
+        </button>
+        <button 
+          type="button" 
+          onclick="switchTab('specs')" 
+          id="tabBtn-specs" 
+          class="tab-btn font-heading text-xs sm:text-sm font-semibold pb-2 border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors whitespace-nowrap"
+        >
+          <i class="fa-solid fa-sliders mr-1.5"></i> Technical Specifications
+        </button>
+        <button 
+          type="button" 
+          onclick="switchTab('shipping')" 
+          id="tabBtn-shipping" 
+          class="tab-btn font-heading text-xs sm:text-sm font-semibold pb-2 border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors whitespace-nowrap"
+        >
+          <i class="fa-solid fa-truck-ramp-box mr-1.5"></i> Shipping & Returns
+        </button>
+        <button 
+          type="button" 
+          onclick="switchTab('reviews')" 
+          id="tabBtn-reviews" 
+          class="tab-btn font-heading text-xs sm:text-sm font-semibold pb-2 border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors whitespace-nowrap flex items-center gap-1.5"
+        >
+          <i class="fa-solid fa-star text-amber-400"></i>
+          <span>Customer Reviews</span>
+          <span class="bg-amber-100 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <%= (product.ratingCount || 100) %>
+          </span>
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Overview & Highlights -->
+      <div id="tabContent-overview" class="tab-pane space-y-6">
+        <div>
+          <h3 class="font-heading font-bold text-base text-[#0d2a1c] mb-2">Product Overview</h3>
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            <%= product.description || 'Crafted with premium materials for maximum durability and everyday performance. Designed for modern living with full manufacturer warranty, hassle-free returns, and customer satisfaction assurance.' %>
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-heading font-bold text-base text-[#0d2a1c] mb-3">Key Features & Highlights</h3>
+          <% 
+            const featureList = (product.features && product.features.length > 0) 
+              ? product.features 
+              : [
+                'Engineered with premium, long-lasting materials tailored for everyday use',
+                'Modern ergonomic design blending elegance and maximum functionality',
+                'Sustainably packaged in 100% recyclable, eco-friendly boxing',
+                'Backed by ViVA 30-day money-back guarantee and 2-year warranty'
+              ];
+          %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <% featureList.forEach(function(feat) { %>
+            <div class="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50/70 border border-gray-100">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-xs mt-0.5"></i>
+              <span class="text-xs text-gray-700 font-medium"><%= feat %></span>
+            </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Technical Specifications Table -->
+      <div id="tabContent-specs" class="tab-pane hidden space-y-4">
+        <h3 class="font-heading font-bold text-base text-[#0d2a1c]">Technical Specifications</h3>
+        <p class="text-xs text-gray-500">Official technical characteristics and manufacturing specifications.</p>
+        
+        <div class="border border-gray-200/80 rounded-2xl overflow-hidden">
+          <table class="w-full text-left text-xs divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100">
+              <tr class="bg-gray-50/50">
+                <td class="py-3 px-4 font-semibold text-gray-600 w-1/3">Brand</td>
+                <td class="py-3 px-4 text-gray-800 font-medium"><%= product.brand || 'ViVA Essentials' %></td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4 font-semibold text-gray-600">Model / SKU</td>
+                <td class="py-3 px-4 text-gray-800 font-mono text-[11px]"><%= product.slug.toUpperCase() %></td>
+              </tr>
+              <tr class="bg-gray-50/50">
+                <td class="py-3 px-4 font-semibold text-gray-600">Category</td>
+                <td class="py-3 px-4 text-gray-800"><%= product.category %></td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4 font-semibold text-gray-600">Available Colors</td>
+                <td class="py-3 px-4 text-gray-800"><%= (product.colors || ['Classic Black', 'Natural Beige', 'Forest Green']).join(', ') %></td>
+              </tr>
+              <tr class="bg-gray-50/50">
+                <td class="py-3 px-4 font-semibold text-gray-600">Available Options</td>
+                <td class="py-3 px-4 text-gray-800"><%= (product.sizes || ['Standard', 'Pro']).join(', ') %></td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4 font-semibold text-gray-600">Manufacturer Warranty</td>
+                <td class="py-3 px-4 text-gray-800">2 Years Full Official Warranty</td>
+              </tr>
+              <tr class="bg-gray-50/50">
+                <td class="py-3 px-4 font-semibold text-gray-600">Return Window</td>
+                <td class="py-3 px-4 text-gray-800">30 Days Easy Return Policy</td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4 font-semibold text-gray-600">Box Contents</td>
+                <td class="py-3 px-4 text-gray-800">1x <%= product.name %>, Quick Start Guide, Warranty Card, Recyclable Packaging</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Content 3: Shipping & Returns -->
+      <div id="tabContent-shipping" class="tab-pane hidden space-y-6">
+        <div>
+          <h3 class="font-heading font-bold text-base text-[#0d2a1c] mb-2">Shipping Policies & Delivery Timelines</h3>
+          <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+            All orders placed before 2:00 PM EST ship the same business day from our automated fulfillment centers. Standard delivery takes 2-4 business days across the continental US. Express overnight delivery options are available during checkout.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
+            <span class="font-semibold text-xs text-gray-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-box-open text-[#123524]"></i> Standard Shipping
+            </span>
+            <p class="text-[11px] text-gray-500">2-4 Business Days. Free on orders over $49.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
+            <span class="font-semibold text-xs text-gray-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-plane text-[#123524]"></i> Priority Express
+            </span>
+            <p class="text-[11px] text-gray-500">1-2 Business Days. Calculated at checkout.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-1.5">
+            <span class="font-semibold text-xs text-gray-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate-left text-[#123524]"></i> 30-Day Easy Returns
+            </span>
+            <p class="text-[11px] text-gray-500">Pre-paid shipping label included in every box.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 4: Customer Reviews -->
+      <div id="tabContent-reviews" class="tab-pane hidden space-y-8">
+        
+        <!-- Scorecard & Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-2xl bg-gray-50 border border-gray-100 items-center">
+          <div class="md:col-span-4 text-center border-b md:border-b-0 md:border-r border-gray-200/80 pb-4 md:pb-0 md:pr-6">
+            <div class="font-heading font-bold text-4xl sm:text-5xl text-[#0d2a1c]">
+              <%= (product.ratingAvg || 4.8).toFixed(1) %>
+            </div>
+            <div class="flex text-[#f0a83e] justify-center gap-1 my-1.5 text-sm">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="text-xs text-gray-500">Based on <%= (product.ratingCount || 100) %> verified customer ratings</p>
+          </div>
+
+          <!-- Progress Bars -->
+          <div class="md:col-span-8 space-y-2 text-xs">
+            <div class="flex items-center gap-3">
+              <span class="w-12 text-gray-500">5 Stars</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-400 rounded-full" style="width: 86%;"></div>
+              </div>
+              <span class="w-8 text-right font-medium text-gray-700">86%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-12 text-gray-500">4 Stars</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-400 rounded-full" style="width: 10%;"></div>
+              </div>
+              <span class="w-8 text-right font-medium text-gray-700">10%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-12 text-gray-500">3 Stars</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-400 rounded-full" style="width: 3%;"></div>
+              </div>
+              <span class="w-8 text-right font-medium text-gray-700">3%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="w-12 text-gray-500">2 Stars</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-400 rounded-full" style="width: 1%;"></div>
+              </div>
+              <span class="w-8 text-right font-medium text-gray-700">1%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample Verified Reviews -->
+        <div class="space-y-4">
+          <h4 class="font-heading font-bold text-sm text-[#0d2a1c]">Recent Customer Feedback</h4>
+          
+          <div class="divide-y divide-gray-100">
+            
+            <div class="py-4 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-xs text-gray-800">Jessica Miller</span>
+                  <span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-badge-check text-[9px]"></i> Verified Buyer
+                  </span>
+                </div>
+                <span class="text-[11px] text-gray-400">2 days ago</span>
+              </div>
+              <div class="flex text-[#f0a83e] text-[11px]">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-xs text-gray-600 leading-relaxed">
+                "Exceeded all my expectations! The quality feels premium, packaging was sleek, and delivery arrived a day earlier than projected. Will definitely purchase again."
+              </p>
+            </div>
+
+            <div class="py-4 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-xs text-gray-800">David Reynolds</span>
+                  <span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-badge-check text-[9px]"></i> Verified Buyer
+                  </span>
+                </div>
+                <span class="text-[11px] text-gray-400">1 week ago</span>
+              </div>
+              <div class="flex text-[#f0a83e] text-[11px]">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              </div>
+              <p class="text-xs text-gray-600 leading-relaxed">
+                "Solid build quality and great attention to detail. Excellent value for the price. Highly recommend to anyone looking for everyday reliability."
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="font-heading font-bold text-xl text-[#0d2a1c]">Customers Also Explored</h2>
+        <a href="/shop" class="text-xs font-semibold text-[#123524] hover:underline flex items-center gap-1">
+          <span>View All in Shop</span>
+          <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
+        <% relatedProducts.forEach(function(rel) { %>
+          <%- include('../partials/product-card', { product: rel }) %>
+        <% }); %>
+      </div>
+    </div>
+    <% } %>
+
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+  <!-- Interactive Client-side Script for Gallery, Tabs, and Stepper -->
+  <script>
+    // Thumbnail Switcher
+    function switchMainImage(url, el) {
+      document.getElementById('mainProductImage').src = url;
+      document.querySelectorAll('.thumb-btn').forEach(btn => {
+        btn.classList.remove('border-[#123524]', 'ring-2', 'ring-[#123524]/20');
+        btn.classList.add('border-gray-200');
+      });
+      el.classList.remove('border-gray-200');
+      el.classList.add('border-[#123524]', 'ring-2', 'ring-[#123524]/20');
+    }
+
+    // Color Selector
+    function selectColor(colorName, el) {
+      document.getElementById('selectedColorName').textContent = colorName;
+      document.querySelectorAll('.color-pill').forEach(btn => {
+        btn.classList.remove('border-[#123524]', 'bg-[#123524]', 'text-white');
+        btn.classList.add('border-gray-200', 'bg-gray-50', 'text-gray-700');
+      });
+      el.classList.remove('border-gray-200', 'bg-gray-50', 'text-gray-700');
+      el.classList.add('border-[#123524]', 'bg-[#123524]', 'text-white');
+    }
+
+    // Size Selector
+    function selectSize(sizeName, el) {
+      document.getElementById('selectedSizeName').textContent = sizeName;
+      document.querySelectorAll('.size-pill').forEach(btn => {
+        btn.classList.remove('border-[#123524]', 'bg-[#123524]', 'text-white');
+        btn.classList.add('border-gray-200', 'bg-gray-50', 'text-gray-700');
+      });
+      el.classList.remove('border-gray-200', 'bg-gray-50', 'text-gray-700');
+      el.classList.add('border-[#123524]', 'bg-[#123524]', 'text-white');
+    }
+
+    // Quantity Stepper
+    function changeQty(delta) {
+      const input = document.getElementById('productQty');
+      let val = parseInt(input.value) || 1;
+      val += delta;
+      if (val < 1) val = 1;
+      const max = parseInt(input.getAttribute('max')) || 50;
+      if (val > max) val = max;
+      input.value = val;
+    }
+
+    // Tab Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-[#123524]', 'text-[#123524]', 'font-bold');
+        btn.classList.add('border-transparent', 'text-gray-400');
+      });
+
+      const activePane = document.getElementById('tabContent-' + tabId);
+      const activeBtn = document.getElementById('tabBtn-' + tabId);
+      if (activePane) activePane.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.classList.add('border-[#123524]', 'text-[#123524]', 'font-bold');
+        activeBtn.classList.remove('border-transparent', 'text-gray-400');
+      }
+    }
+
+    // Buy Now Direct (adds item & redirects to checkout or login)
+    async function buyNowDirect(productId) {
+      const qty = parseInt(document.getElementById('productQty').value) || 1;
+      try {
+        const response = await fetch('/cart/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity: qty })
+        });
+        
+        if (response.status === 401) {
+          const data = await response.json();
+          window.location.href = data.redirect || '/login?redirect=' + encodeURIComponent(window.location.pathname);
+          return;
+        }
+        
+        window.location.href = '/checkout';
+      } catch (err) {
+        window.location.href = '/checkout';
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+
+  <main class="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+    <div class="bg-white rounded-3xl border border-gray-100 p-8 sm:p-12 text-center shadow-2xs space-y-6">
+      
+      <!-- Success Icon -->
+      <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-2xl animate-bounce">
+        <i class="fa-solid fa-check"></i>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-xs font-bold uppercase tracking-widest text-[#2c6b48]">Purchase Successful</span>
+        <h1 class="font-heading font-bold text-2xl sm:text-3xl text-[#0d2a1c]">Thank You for Your Order!</h1>
+        <p class="text-xs sm:text-sm text-gray-600 max-w-md mx-auto">
+          We've received your order and are packing your items. A confirmation receipt has been sent to your email.
+        </p>
+      </div>
+
+      <!-- Order Details Card -->
+      <div class="bg-[#f3efe3] rounded-2xl p-6 text-left space-y-3 max-w-md mx-auto border border-gray-200/60 text-xs">
+        <div class="flex justify-between pb-2 border-b border-gray-200">
+          <span class="text-gray-500">Order Reference:</span>
+          <span class="font-mono font-bold text-[#123524] text-sm"><%= order.orderNumber %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Customer Name:</span>
+          <span class="font-medium text-gray-800"><%= order.customerName %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Delivery Address:</span>
+          <span class="font-medium text-gray-800"><%= order.address %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Payment:</span>
+          <span class="font-medium text-gray-800"><%= order.paymentMethod %></span>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-gray-200 items-baseline">
+          <span class="font-bold text-gray-900">Total Paid:</span>
+          <span class="font-heading font-bold text-base text-[#123524]">$<%= order.total %></span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <a 
+          href="/track-order" 
+          class="w-full sm:w-auto bg-[#123524] hover:bg-[#17422e] text-white font-semibold text-xs sm:text-sm px-8 py-3.5 rounded-full transition-colors shadow-xs"
+        >
+          Track This Package &rarr;
+        </a>
+        <a 
+          href="/shop" 
+          class="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-xs sm:text-sm px-8 py-3.5 rounded-full transition-colors"
+        >
+          Continue Shopping
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+</body>
+</html>

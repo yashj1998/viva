@@ -1,0 +1,18 @@
+<!-- Category Strip (9 Icons) -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+  <div class="flex items-center justify-start sm:justify-between gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-2 px-1">
+    <% (categories || []).forEach(function(category) { %>
+    <a href="/shop?category=<%= category.slug %>" class="flex flex-col items-center shrink-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123524] rounded-xl p-1 transition-transform">
+      <div 
+        class="w-[52px] h-[52px] sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110 active:scale-95 shadow-xs"
+        style="background-color: <%= category.bgColor || '#f1f5f9' %>;"
+      >
+        <i class="<%= category.iconClass %> text-base sm:text-lg transition-transform duration-200" style="color: <%= category.iconColor || '#123524' %>;"></i>
+      </div>
+      <span class="text-[11px] sm:text-xs font-medium text-[#16261d] mt-1.5 sm:mt-2 text-center group-hover:text-[#123524] transition-colors whitespace-nowrap">
+        <%= category.name %>
+      </span>
+    </a>
+    <% }); %>
+  </div>
+</section>

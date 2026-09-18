@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head') %>
+<body class="min-h-screen flex flex-col bg-[#fafaf9] text-[#16261d]">
+  
+  <%- include('../partials/utility-bar') %>
+  <%- include('../partials/header') %>
+  <%- include('../partials/nav-bar') %>
+
+  <!-- Flash Sale Hero Header with Countdown -->
+  <div class="bg-[#123524] text-white py-10 sm:py-14 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      <div class="space-y-3 text-center md:text-left max-w-xl">
+        <div class="inline-flex items-center gap-1.5 bg-[#e8756a] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
+          <span>⚡ Flash Deals · Limited Time</span>
+        </div>
+        <h1 class="font-heading font-bold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-tight">
+          Save Up to 40% Off Selected Essentials
+        </h1>
+        <p class="text-xs sm:text-sm text-gray-300">
+          Hand-picked everyday favorites on special discount this week only. While stocks last.
+        </p>
+      </div>
+
+      <!-- Countdown Timer Box -->
+      <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6 text-center space-y-2 shrink-0">
+        <div class="text-[11px] uppercase tracking-wider text-emerald-300 font-semibold">Offer Ends In</div>
+        <div class="flex items-center gap-3 font-heading font-bold text-xl sm:text-2xl text-white">
+          <div class="bg-black/30 px-3 py-2 rounded-xl">
+            <span id="deal-hours">09</span>
+            <div class="text-[9px] font-normal text-gray-300 uppercase tracking-normal">Hours</div>
+          </div>
+          <span>:</span>
+          <div class="bg-black/30 px-3 py-2 rounded-xl">
+            <span id="deal-mins">42</span>
+            <div class="text-[9px] font-normal text-gray-300 uppercase tracking-normal">Mins</div>
+          </div>
+          <span>:</span>
+          <div class="bg-black/30 px-3 py-2 rounded-xl">
+            <span id="deal-secs">18</span>
+            <div class="text-[9px] font-normal text-gray-300 uppercase tracking-normal">Secs</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Deals Grid Section -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full space-y-10">
+    
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="font-heading font-bold text-xl sm:text-2xl text-[#0d2a1c]">
+          Today's Top Discounted Deals
+        </h2>
+        <p class="text-xs text-gray-500 mt-0.5">Discounts applied automatically at checkout.</p>
+      </div>
+      <a href="/shop" class="text-xs sm:text-sm font-semibold text-[#123524] hover:underline">
+        Browse All Catalog &rarr;
+      </a>
+    </div>
+
+    <!-- Deals Cards Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+      <% (products || []).forEach(function(product) { %>
+        <div class="h-full">
+          <%- include('../partials/product-card', { product: product }) %>
+        </div>
+      <% }); %>
+    </div>
+
+    <!-- Promo Banners Row -->
+    <%- include('../partials/promo-banner-row', { promoBanners: promoBanners }) %>
+
+  </main>
+
+  <%- include('../partials/trust-strip') %>
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+
+  <!-- Countdown Script -->
+  <script>
+    let secondsLeft = 9 * 3600 + 42 * 60 + 18;
+    setInterval(() => {
+      if (secondsLeft > 0) secondsLeft--;
+      const h = Math.floor(secondsLeft / 3600);
+      const m = Math.floor((secondsLeft % 3600) / 60);
+      const s = secondsLeft % 60;
+      document.getElementById('deal-hours').innerText = String(h).padStart(2, '0');
+      document.getElementById('deal-mins').innerText = String(m).padStart(2, '0');
+      document.getElementById('deal-secs').innerText = String(s).padStart(2, '0');
+    }, 1000);
+  </script>
+
+</body>
+</html>

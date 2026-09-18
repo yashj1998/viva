@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/head') %>
+<body class="min-h-screen flex flex-col bg-white text-[#16261d]">
+  
+  <!-- 1. Utility Announcement Bar -->
+  <%- include('partials/utility-bar') %>
+
+  <!-- 2. Global Header -->
+  <%- include('partials/header') %>
+
+  <!-- 3. Primary Navigation Bar -->
+  <%- include('partials/nav-bar') %>
+
+  <!-- Main Content Body -->
+  <main class="flex-1">
+    
+    <!-- 4. Hero Carousel -->
+    <%- include('partials/hero-carousel', { heroSlides: heroSlides }) %>
+
+    <!-- 5. Category Strip (9 Icons) -->
+    <%- include('partials/category-strip', { categories: categories }) %>
+
+    <!-- 6. Top Picks Deals Carousel -->
+    <%- include('partials/product-carousel', { products: products, topPicksSettings: topPicksSettings }) %>
+
+    <!-- 7. 3-Up Curated Promo Banners -->
+    <%- include('partials/promo-banner-row', { promoBanners: promoBanners }) %>
+
+    <!-- 8. Social Proof Reviews -->
+    <%- include('partials/testimonial-carousel', { reviews: reviews }) %>
+
+    <!-- 9. Newsletter Signup Banner -->
+    <%- include('partials/newsletter-signup') %>
+
+    <!-- 10. Trust Guarantees Strip -->
+    <%- include('partials/trust-strip') %>
+
+  </main>
+
+  <!-- 11. Global Footer -->
+  <%- include('partials/footer') %>
+
+  <!-- Client-side Scripts -->
+  <%- include('partials/scripts') %>
+</body>
+</html>
