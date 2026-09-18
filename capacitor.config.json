@@ -1,0 +1,9 @@
+{
+  "appId": "com.viva.ecommerce",
+  "appName": "ViVA Store",
+  "webDir": "frontend/public",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}

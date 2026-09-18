@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "seed": "node backend/seeds/seed.js"
+    "seed": "node backend/seeds/seed.js",
+    "cap:add:android": "cap add android",
+    "cap:sync": "cap sync android",
+    "cap:copy": "cap copy android",
+    "cap:open": "cap open android"
   },
   "keywords": [
     "ecommerce",
@@ -20,6 +24,9 @@
   "author": "ViVA Team",
   "license": "MIT",
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
