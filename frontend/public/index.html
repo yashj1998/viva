@@ -143,8 +143,8 @@
   <p class="footer-note">Smart Shopping for Modern Living</p>
 
   <script>
-    // The target server URL (defaults to local development server)
-    const TARGET_URL = window.VIVA_SERVER_URL || 'http://localhost:3002';
+    // The target server URL (defaults to live production server)
+    const TARGET_URL = window.VIVA_SERVER_URL || 'https://viva-y609.onrender.com';
 
     function checkConnection() {
       if (window.location.origin === new URL(TARGET_URL, window.location.href).origin) {
@@ -161,17 +161,17 @@
         })
         .catch(() => {
           document.getElementById('spinner').style.display = 'none';
-          document.getElementById('status-text').textContent = 'Storefront running at http://localhost:3002';
+          document.getElementById('status-text').textContent = 'Connecting to live store...';
           const btn = document.getElementById('retry-btn');
           btn.style.display = 'inline-block';
-          btn.textContent = 'Connect to Store';
+          btn.textContent = 'Open Store';
         });
     }
 
     function retryConnection() {
       document.getElementById('spinner').style.display = 'block';
       document.getElementById('retry-btn').style.display = 'none';
-      document.getElementById('status-text').textContent = 'Opening http://localhost:3002...';
+      document.getElementById('status-text').textContent = 'Connecting to ViVA Store...';
       window.location.href = TARGET_URL;
     }
 

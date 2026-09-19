@@ -3,6 +3,7 @@
   "appName": "ViVA Store",
   "webDir": "frontend/public",
   "server": {
+    "url": "https://viva-y609.onrender.com",
     "androidScheme": "https",
     "cleartext": true
   }
