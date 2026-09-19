@@ -143,29 +143,36 @@
   <p class="footer-note">Smart Shopping for Modern Living</p>
 
   <script>
-    // The target server URL (can be updated when deployed)
-    const TARGET_URL = window.VIVA_SERVER_URL || null;
+    // The target server URL (defaults to local development server)
+    const TARGET_URL = window.VIVA_SERVER_URL || 'http://localhost:3002';
 
     function checkConnection() {
-      if (TARGET_URL && window.location.href !== TARGET_URL) {
-        document.getElementById('status-text').textContent = 'Opening ViVA Store...';
+      if (window.location.origin === new URL(TARGET_URL, window.location.href).origin) {
+        // Already on the server origin
         window.location.replace(TARGET_URL);
-      } else {
-        // Standalone offline shell presentation
-        setTimeout(() => {
-          document.getElementById('spinner').style.display = 'none';
-          document.getElementById('status-text').textContent = 'Ready to connect to live storefront server.';
-          document.getElementById('retry-btn').style.display = 'inline-block';
-          document.getElementById('retry-btn').textContent = 'Connect';
-        }, 1200);
+        return;
       }
+
+      // Check if storefront server is reachable
+      fetch(TARGET_URL, { mode: 'no-cors' })
+        .then(() => {
+          document.getElementById('status-text').textContent = 'Opening ViVA Store...';
+          window.location.href = TARGET_URL;
+        })
+        .catch(() => {
+          document.getElementById('spinner').style.display = 'none';
+          document.getElementById('status-text').textContent = 'Storefront running at http://localhost:3002';
+          const btn = document.getElementById('retry-btn');
+          btn.style.display = 'inline-block';
+          btn.textContent = 'Connect to Store';
+        });
     }
 
     function retryConnection() {
       document.getElementById('spinner').style.display = 'block';
       document.getElementById('retry-btn').style.display = 'none';
-      document.getElementById('status-text').textContent = 'Reconnecting...';
-      setTimeout(checkConnection, 1000);
+      document.getElementById('status-text').textContent = 'Opening http://localhost:3002...';
+      window.location.href = TARGET_URL;
     }
 
     window.addEventListener('DOMContentLoaded', checkConnection);

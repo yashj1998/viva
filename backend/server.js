@@ -64,7 +64,7 @@ app.use(async (req, res, next) => {
 });
 
 // Static files (CSS, JS, Images from frontend/public)
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+app.use(express.static(path.join(__dirname, '../frontend/public'), { index: false }));
 
 // View Engine (EJS from frontend/views)
 app.set('view engine', 'ejs');
